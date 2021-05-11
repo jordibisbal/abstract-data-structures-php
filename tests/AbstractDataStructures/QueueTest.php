@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace AbstractDataStructures\Tests;
 
 use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
-use AbstractDataStructures\Tests\Stubs\TestCollection;
 use AbstractDataStructures\Tests\Stubs\TestItem;
 use AbstractDataStructures\Tests\Stubs\TestQueue;
 use JetBrains\PhpStorm\Pure;
