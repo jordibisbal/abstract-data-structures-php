@@ -1,0 +1,47 @@
+{
+    "name": "jordibisbal/abstract-data-structures-php",
+    "description": "Abstract data structures for PHP",
+    "version": "0.1",
+    "keywords": [
+        "abstract data structures"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jordi Bisbal",
+            "email": "jordi.bisbal+ads@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/jordibisbal/functional-php"
+        }
+    ],
+    "require": {
+        "php": "~8",
+        "lstrojny/functional-php": "^1.17",
+        "jordibisbal/functional-php": "@dev"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "~3.0",
+        "phpunit/phpunit": "^7.0 || ^8.0 || ^9.5",
+        "friendsofphp/php-cs-fixer": "^2.17"
+    },
+    "autoload": {
+        "psr-4": {
+            "AbstractDataStructures\\": "src/AbstractDataStructures"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AbstractDataStructures\\Tests\\": "tests/AbstractDataStructures"
+        }
+    },
+    "scripts": {
+        "tests": "vendor/bin/phpunit",
+        "coding-style": "vendor/bin/phpcs && vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php_cs.dist",
+        "clear": "rm -rf vendor/"
+    }
+}
