@@ -6,7 +6,6 @@ namespace AbstractDataStructures;
 use Countable;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
-use phpDocumentor\Reflection\Types\Integer;
 
 #[Immutable] abstract class Queue implements Countable
 {

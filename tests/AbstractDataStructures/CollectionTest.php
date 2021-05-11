@@ -122,6 +122,15 @@ final class CollectionTest extends testCase
         assertEquals(array_values($array), $collection->values());
     }
 
+    public function testRemovingAnNonexistentKeyProducesNoEffect(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $collection = $collection->remove('nonexistent');
+
+        assertEquals(array_keys($this->anArray()), $collection->keys());
+        assertEquals(array_values($this->anArray()), $collection->values());
+    }
+
     public function testACollectionCanBeCheckForAKeyExistence(): void
     {
         $collection = TestCollection::fromArray($this->anArray());
