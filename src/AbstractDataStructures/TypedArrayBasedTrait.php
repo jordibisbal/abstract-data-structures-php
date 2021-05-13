@@ -56,7 +56,7 @@ trait TypedArrayBasedTrait
 
         foreach($items as $item) {
             if (!is_a($item, $type)) {
-                throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($items, $type);
+                throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $type);
             }
         }
     }

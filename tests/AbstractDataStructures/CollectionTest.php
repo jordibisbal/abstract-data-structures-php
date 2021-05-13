@@ -143,7 +143,7 @@ final class CollectionTest extends testCase
     {
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
-            'Unable to set values as the given item is of type string but ' .
+            'Unable to set value as the given item is of type string but ' .
             'AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 

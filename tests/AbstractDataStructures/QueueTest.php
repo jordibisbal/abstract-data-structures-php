@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace AbstractDataStructures\Tests;
 
 use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
+use AbstractDataStructures\Exceptions\UnableToSetValue;
 use AbstractDataStructures\Tests\Stubs\TestItem;
 use AbstractDataStructures\Tests\Stubs\TestQueue;
 use JetBrains\PhpStorm\Pure;
@@ -136,6 +137,17 @@ final class QueueTest extends testCase
         $queue->peek(-4);
     }
 
+    #[Pure] public function testFailsWhenCreatingFromAnArrayWithInvalidTypes(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type string but '
+            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        TestQueue::fromArray($this->aWrongTypedArray());
+    }
 
     #[Pure] private function anArray(): array
     {
@@ -144,5 +156,14 @@ final class QueueTest extends testCase
             'b' => new TestItem('B'),
             'c' => new TestItem('C')
          ];
+    }
+
+    #[Pure] private function aWrongTypedArray(): array
+    {
+        return [
+            'a' => new TestItem('A'),
+            'b' => new TestItem('B'),
+            'c' => 'wrong'
+        ];
     }
 }
