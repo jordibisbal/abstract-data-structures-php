@@ -9,7 +9,7 @@ A queue structure, items can be queued (put in the queue), dequeued (retrieved f
 * [head](#public-function-head-mixed)
 * [isEmpty](#public-function-isempty-bool)  
 * [length](#public-function-length-int)
-  
+* [peek](#public-function-peekint-position-mixed)  
 * [queue](#public-function-queuemixed-item-static)
 * [tail](#public-function-tail-mixed)
 * [type](#abstract-public-function-type-string)
