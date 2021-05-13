@@ -137,7 +137,7 @@ final class QueueTest extends testCase
         $queue->peek(-4);
     }
 
-    #[Pure] public function testFailsWhenCreatingFromAnArrayWithInvalidTypes(): void
+    public function testFailsWhenCreatingFromAnArrayWithInvalidTypes(): void
     {
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
