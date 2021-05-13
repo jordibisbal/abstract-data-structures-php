@@ -145,7 +145,6 @@ final class QueueTest extends testCase
             . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
-        /** @noinspection PhpExpressionResultUnusedInspection */
         TestQueue::fromArray($this->aWrongTypedArray());
     }
 

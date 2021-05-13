@@ -58,6 +58,7 @@ final class PersistentArray
         return current(array_slice($this->items, -1, 1));
     }
 
+    /** @throws UnableToRetrieveValue */
     public function peek(int $position): mixed
     {
         if ($position === 0) {

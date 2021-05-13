@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace AbstractDataStructures;
 
 
+use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use AbstractDataStructures\Exceptions\UnableToSetValue;
 use AbstractDataStructures\PersistentDataStructures\PersistentArray;
 use JetBrains\PhpStorm\Pure;
@@ -19,7 +20,7 @@ trait TypedArrayBasedTrait
         $this->itemsArray = $items;
     }
 
-    #[Pure] public static function createEmpty(): static
+    public static function createEmpty(): static
     {
         return static::fromArray([]);
     }
@@ -29,7 +30,8 @@ trait TypedArrayBasedTrait
         return $this->count() === 0;
     }
 
-    #[Pure] public static function fromArray(array $items): static
+    /** @throws UnableToSetValue */
+    public static function fromArray(array $items): static
     {
         $dataStructure = new static(PersistentArray::fromArray([]));
         $dataStructure->guardArraySet($items);
@@ -43,6 +45,7 @@ trait TypedArrayBasedTrait
         return $this->itemsArray->count();
     }
 
+    /** @throws UnableToSetValue */
     protected function guardSet(mixed $item): void
     {
         if (!is_a($item, $this->type())) {
@@ -50,6 +53,7 @@ trait TypedArrayBasedTrait
         }
     }
 
+    /** @throws UnableToSetValue */
     protected function guardArraySet(array $items): void
     {
         $type = $this->type();
@@ -61,6 +65,7 @@ trait TypedArrayBasedTrait
         }
     }
 
+    /** @throws UnableToRetrieveValue */
     public function peek(int $position): mixed
     {
         return $this->itemsArray->peek($position);
