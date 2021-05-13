@@ -1,6 +1,6 @@
 # Queue
 
-A queue structure, items can be queued (put in the queue), dequeued (retrieved) from the queue, the items are retrieved in the same order that are put on the queue.
+A queue structure, items can be queued (put in the queue), dequeued (retrieved from the queue), the items are retrieved in the same order that are put on the queue.
 
 * [count](#public-function-count-int)
 * [createEmpty](#static-function-createempty-static)  

@@ -94,6 +94,48 @@ final class QueueTest extends testCase
         assertEquals($queue->count(), $queue->length());
     }
 
+    public function testAPositionCanBePeeked(): void
+    {
+        $queue = TestQueue::fromArray($this->anArray());
+
+        assertEquals('A', $queue->peek(1)->value);
+        assertEquals('B', $queue->peek(2)->value);
+        assertEquals('C', $queue->peek(3)->value);
+        assertEquals('A', $queue->peek(-3)->value);
+        assertEquals('B', $queue->peek(-2)->value);
+        assertEquals('C', $queue->peek(-1)->value);
+    }
+
+    public function testFailsWhenPositionZeroIsPeeked(): void
+    {
+        $queue = TestQueue::fromArray($this->anArray());
+
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Because zero position is invalid');
+
+        $queue->peek(0);
+    }
+
+    public function testFailsWhenPositionIfBeyondEndOfTheQueue(): void
+    {
+        $queue = TestQueue::fromArray($this->anArray());
+
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Because no such position exists, asked for 4 but only 3 available.');
+
+        $queue->peek(4);
+    }
+
+    public function testFailsWhenPositionIfBelowStartOfTheQueue(): void
+    {
+        $queue = TestQueue::fromArray($this->anArray());
+
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Because no such position exists, asked for -4 but only 3 available.');
+
+        $queue->peek(-4);
+    }
+
 
     #[Pure] private function anArray(): array
     {

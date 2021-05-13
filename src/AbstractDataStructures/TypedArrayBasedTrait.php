@@ -60,4 +60,9 @@ trait TypedArrayBasedTrait
             }
         }
     }
+
+    public function peek(int $position): mixed
+    {
+        return $this->itemsArray->peek($position);
+    }
 }

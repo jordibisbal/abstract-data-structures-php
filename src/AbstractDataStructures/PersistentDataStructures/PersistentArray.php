@@ -58,6 +58,24 @@ final class PersistentArray
         return current(array_slice($this->items, -1, 1));
     }
 
+    public function peek(int $position): mixed
+    {
+        if ($position === 0) {
+            throw UnableToRetrieveValue::becauseZeroPositionIsInvalid();
+        }
+
+        $count = $this->count();
+        if ($count < abs($position)){
+            throw UnableToRetrieveValue::becauseNoSuchPositionExists($count, $position);
+        }
+
+        return current(array_slice(
+            $this->items,
+            ($position > 0) ? ($position - 1) : $position,
+            1
+        ));
+    }
+
     #[Pure] public function first(): mixed
     {
         if ($this->count() === 0) {
