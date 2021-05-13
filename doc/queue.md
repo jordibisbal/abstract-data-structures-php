@@ -9,6 +9,7 @@ A queue structure, items can be queued (put in the queue), dequeued (retrieved f
 * [head](#public-function-head-mixed)
 * [isEmpty](#public-function-isempty-bool)  
 * [length](#public-function-length-int)
+  
 * [queue](#public-function-queuemixed-item-static)
 * [tail](#public-function-tail-mixed)
 * [type](#abstract-public-function-type-string)
@@ -63,6 +64,19 @@ Checks whenever the collection is empty
 
 Alias to [count()](#public-function-count-int).
 
+### public function peek(int $position): mixed
+
+Return the element at position $position, the first position is 1, if a negative $position is given, it counts form the end, a 0 $position is invalid.
+
+```
+$queue = MixedQueue::fromArray([Mixed::from(123), Mixed::from(456)];
+
+$queue->peek(1)->value;  // 123
+$queue->peek(-1)->value; // 456
+$queue->peek(2)->value;  // 456
+$queue->peek(-2)->value; // 123
+```
+
 ### public function queue(mixed $item): static
 
 Adds the element to the queue, returns a new queue with the element in within.
@@ -70,7 +84,7 @@ Adds the element to the queue, returns a new queue with the element in within.
 ```
 $queue = MixedQueue::createEmpty();
 
-$newQueue = $queue->queue(new Mixed(123));
+$newQueue = $queue->queue(Mixed::from(123));
 
 $queue->Length()    // 0
 $newQueue->Length() // 1
