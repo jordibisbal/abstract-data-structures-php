@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace AbstractDataStructures\Tests;
 
+use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use AbstractDataStructures\Exceptions\UnableToSetValue;
 use AbstractDataStructures\Tests\Stubs\TestCollection;
 use AbstractDataStructures\Tests\Stubs\TestItem;
@@ -25,6 +26,18 @@ final class CollectionTest extends testCase
     {
         assertNull(TestCollection::createEmpty()->first());
         assertNull(TestCollection::createEmpty()->last());
+    }
+
+    public function testFirstAndLastItemsCanBeRetrieved(): void
+    {
+        $collection = TestCollection::fromArray([
+            new TestItem('first'),
+            new TestItem('middle'),
+            new TestItem('last')
+        ]);
+
+        assertEquals('first', $collection->first()->value);
+        assertEquals('last', $collection->last()->value);
     }
 
     public function testAnItemCanBeAddedToACollection(): void
@@ -61,6 +74,16 @@ final class CollectionTest extends testCase
         $collection = TestCollection::fromArray($this->anArray());
 
         assertEquals('B', $collection->get('b')->value);
+    }
+
+    public function testWhenRetrievingANonExistingKeyExceptionIsThrown(): void
+    {
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('No such key exists (b).');
+        $collection = TestCollection::createEmpty();
+
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        $collection->get('b');
     }
 
     public function testAnItemCanBeSetByKey(): void
@@ -139,7 +162,7 @@ final class CollectionTest extends testCase
         assertFalse($collection->hasKey('d'));
     }
 
-    public function testAnExceptionIsThrownIfTheSetElementIsNotOfTheProperType(): void
+    public function testAnExceptionIsThrownIfTheAppenedElementIsNotOfTheProperType(): void
     {
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
@@ -148,6 +171,17 @@ final class CollectionTest extends testCase
         );
 
         TestCollection::createEmpty()->append('string');
+    }
+
+    public function testAnExceptionIsThrownIfTheSetElementIsNotOfTheProperType(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type string but ' .
+            'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        TestCollection::createEmpty()->set('', 'string');
     }
 
     public function testACollectionCanBeRetrievedAsArray(): void

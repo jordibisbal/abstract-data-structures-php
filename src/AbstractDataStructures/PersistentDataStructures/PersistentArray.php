@@ -22,9 +22,13 @@ final class PersistentArray
         return new self($items);
     }
 
-    #[Pure] public function get(string $key): mixed
+    /** @throws UnableToRetrieveValue */
+    public function get(string $key): mixed
     {
-        return $this->items[$key] ?? null;
+        if (!array_key_exists($key, $this->items)) {
+            throw UnableToRetrieveValue::becauseNoSuchKeyExists($key);
+        }
+        return $this->items[$key];
     }
     
     #[Pure] public function set(string $key, mixed $value): PersistentArray
@@ -72,7 +76,7 @@ final class PersistentArray
 
         return current(array_slice(
             $this->items,
-            ($position > 0) ? ($position - 1) : $position,
+            ($position >= 0) ? ($position - 1) : $position,
             1
         ));
     }

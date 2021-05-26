@@ -1,0 +1,52 @@
+{
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "phpUnit": {
+        "configDir": "."
+    },
+    "logs": {
+        "text": "build\/infection\/infection.log"
+    },
+    "tmpDir": "build\/infection\/tmp",
+    "mutators": {
+        "@arithmetic": true,
+        "@boolean": true,
+        "@cast": true,
+        "@conditional_boundary": true,
+        "@conditional_negotiation": true,
+        "@function_signature": true,
+        "@identical": true,
+        "@number": true,
+        "@operator": true,
+        "@regex": true,
+        "@removal": true,
+        "@return_value": true,
+        "@sort": true,
+        "@unwrap": true,
+        "@extensions": true,
+        "IncrementInteger": {
+            "ignore": [
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first",
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::last",
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::pop",
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
+            ]
+        },
+        "UnwrapArraySlice": {
+            "ignore": [
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first"
+            ]
+        },
+        "GreaterThanOrEqualTo": {
+            "ignore":[
+                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
+            ]
+        },
+        "global-ignoreSourceCodeByRegex": [
+            "."
+        ]
+    }
+}

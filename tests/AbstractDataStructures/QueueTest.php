@@ -112,7 +112,7 @@ final class QueueTest extends testCase
         $queue = TestQueue::fromArray($this->anArray());
 
         $this->expectException(UnableToRetrieveValue::class);
-        $this->expectExceptionMessage('Because zero position is invalid');
+        $this->expectExceptionMessage('Zero position is invalid');
 
         $queue->peek(0);
     }
@@ -122,7 +122,7 @@ final class QueueTest extends testCase
         $queue = TestQueue::fromArray($this->anArray());
 
         $this->expectException(UnableToRetrieveValue::class);
-        $this->expectExceptionMessage('Because no such position exists, asked for 4 but only 3 available.');
+        $this->expectExceptionMessage('No such position exists, asked for 4 but only 3 available.');
 
         $queue->peek(4);
     }
@@ -132,7 +132,7 @@ final class QueueTest extends testCase
         $queue = TestQueue::fromArray($this->anArray());
 
         $this->expectException(UnableToRetrieveValue::class);
-        $this->expectExceptionMessage('Because no such position exists, asked for -4 but only 3 available.');
+        $this->expectExceptionMessage('No such position exists, asked for -4 but only 3 available.');
 
         $queue->peek(-4);
     }
@@ -146,6 +146,17 @@ final class QueueTest extends testCase
         );
 
         TestQueue::fromArray($this->aWrongTypedArray());
+    }
+
+    public function testFailsWhenQueuesWithInvalidType(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type string but '
+            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        TestQueue::createEmpty()->queue('wrong');
     }
 
     #[Pure] private function anArray(): array

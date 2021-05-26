@@ -21,7 +21,8 @@
     "require": {
         "php": "~8",
         "lstrojny/functional-php": "^1.17",
-        "jordibisbal/functional-php": "@dev"
+        "jordibisbal/functional-php": "@dev",
+        "infection/infection": "^0.23.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

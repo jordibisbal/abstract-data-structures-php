@@ -15,7 +15,7 @@ trait TypedArrayBasedTrait
 
     abstract public function type(): string;
 
-    #[Pure] protected function __construct(PersistentArray $items)
+    #[Pure] private function __construct(PersistentArray $items)
     {
         $this->itemsArray = $items;
     }
@@ -46,7 +46,7 @@ trait TypedArrayBasedTrait
     }
 
     /** @throws UnableToSetValue */
-    protected function guardSet(mixed $item): void
+    private function guardSet(mixed $item): void
     {
         if (!is_a($item, $this->type())) {
             throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $this->type());
@@ -54,7 +54,7 @@ trait TypedArrayBasedTrait
     }
 
     /** @throws UnableToSetValue */
-    protected function guardArraySet(array $items): void
+    private function guardArraySet(array $items): void
     {
         $type = $this->type();
 
