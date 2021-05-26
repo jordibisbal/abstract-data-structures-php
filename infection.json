@@ -44,9 +44,6 @@
             "ignore":[
                 "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
             ]
-        },
-        "global-ignoreSourceCodeByRegex": [
-            "."
-        ]
+        }
     }
 }
