@@ -7,9 +7,8 @@ use Countable;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
-#[Immutable] abstract class Queue implements Countable
+#[Immutable] abstract class Queue extends TypedArrayBasedStructure implements Countable
 {
-    use TypedArrayBasedTrait;
 
     public function queue(mixed $item): static
     {

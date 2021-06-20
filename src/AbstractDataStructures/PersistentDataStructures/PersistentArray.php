@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace AbstractDataStructures\PersistentDataStructures;
 
-
 use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
+use AbstractDataStructures\Exceptions\UnableToRotateValues;
+use AbstractDataStructures\Exceptions\UnableToSwapValues;
 use JetBrains\PhpStorm\Pure;
 use function Functional\each;
 
@@ -28,6 +29,7 @@ final class PersistentArray
         if (!array_key_exists($key, $this->items)) {
             throw UnableToRetrieveValue::becauseNoSuchKeyExists($key);
         }
+
         return $this->items[$key];
     }
     
@@ -56,7 +58,7 @@ final class PersistentArray
     #[Pure] public function last(): mixed
     {
         if ($this->count() === 0) {
-            return null;
+            throw UnableToRetrieveValue::becauseTheStructureIsEmpty();
         }
 
         return current(array_slice($this->items, -1, 1));
@@ -70,7 +72,7 @@ final class PersistentArray
         }
 
         $count = $this->count();
-        if ($count < abs($position)){
+        if ($count < abs($position)) {
             throw UnableToRetrieveValue::becauseNoSuchPositionExists($count, $position);
         }
 
@@ -84,7 +86,7 @@ final class PersistentArray
     #[Pure] public function first(): mixed
     {
         if ($this->count() === 0) {
-            return null;
+            throw UnableToRetrieveValue::becauseTheStructureIsEmpty();
         }
 
         return current(array_slice($this->items, 0, 1));
@@ -132,14 +134,51 @@ final class PersistentArray
         }
 
         $newItems = $this->items;
-        $item = current(array_splice($newItems, count($newItems) - 1, 1));
+        $item = array_pop($newItems);
         return [new self($newItems), $item];
+    }
+
+    public function push(mixed $item): PersistentArray
+    {
+        $newItems = $this->items;
+        array_push($newItems, $item);
+
+        return new self($newItems);
     }
 
     public function unshift(mixed $item): PersistentArray
     {
         $newItems = $this->items;
         array_unshift($newItems, $item);
+
+        return new self($newItems);
+    }
+
+    public function swap(): PersistentArray
+    {
+        if (count($this->items) < 2) {
+            throw UnableToSwapValues::becauseThereIsNotEnoughItemsInTheStructure(count($this->items));
+        }
+        
+        $newItems = $this->items;
+
+        $newItems[0] = $this->items[1];
+        $newItems[1] = $this->items[0];
+        
+        return new self($newItems);
+    }
+
+    public function rotate(): PersistentArray
+    {
+        if (count($this->items) < 3) {
+            throw UnableToRotateValues::becauseThereIsNotEnoughItemsInTheStructure(count($this->items));
+        }
+
+        $newItems = $this->items;
+
+        $newItems[0] = $this->items[1];
+        $newItems[1] = $this->items[2];
+        $newItems[2] = $this->items[0];
 
         return new self($newItems);
     }

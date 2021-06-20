@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertFalse;
-use function PHPUnit\Framework\assertNull;
 use function PHPUnit\Framework\assertTrue;
 
 final class CollectionTest extends testCase
@@ -22,10 +21,20 @@ final class CollectionTest extends testCase
         assertTrue(TestCollection::createEmpty()->isEmpty());
     }
 
-    public function testFirstAndLastItemsOfAnEmptyCollectionAreNull(): void
+    public function testFirstItemOfAnEmptyCollectionThrowException(): void
     {
-        assertNull(TestCollection::createEmpty()->first());
-        assertNull(TestCollection::createEmpty()->last());
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Unable to retrieve values as the structure is empty.');
+
+        TestCollection::createEmpty()->first();
+    }
+
+    public function testLastItemOfAnEmptyCollectionThrowException(): void
+    {
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Unable to retrieve values as the structure is empty.');
+
+        TestCollection::createEmpty()->last();
     }
 
     public function testFirstAndLastItemsCanBeRetrieved(): void
@@ -82,7 +91,6 @@ final class CollectionTest extends testCase
         $this->expectExceptionMessage('No such key exists (b).');
         $collection = TestCollection::createEmpty();
 
-        /** @noinspection PhpExpressionResultUnusedInspection */
         $collection->get('b');
     }
 
@@ -195,7 +203,9 @@ final class CollectionTest extends testCase
         $collection = TestCollection::fromArray($this->anArray());
 
         $collection->foreach(
-            function (TestItem $item, $key) use (&$collectedItems): void { $collectedItems[$key] = $item; }
+            function (TestItem $item, $key) use (&$collectedItems): void {
+                $collectedItems[$key] = $item;
+            }
         );
 
         assertEquals($this->anArray(), $collectedItems);

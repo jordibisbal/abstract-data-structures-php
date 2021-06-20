@@ -3,19 +3,21 @@ declare(strict_types=1);
 
 namespace AbstractDataStructures;
 
-
 use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use AbstractDataStructures\Exceptions\UnableToSetValue;
 use AbstractDataStructures\PersistentDataStructures\PersistentArray;
+use Closure;
 use JetBrains\PhpStorm\Pure;
+use function Functional\each;
+use function JBFunctional\assertIsAOr;
 
-trait TypedArrayBasedTrait
+abstract class TypedArrayBasedStructure
 {
     protected PersistentArray $itemsArray;
 
     abstract public function type(): string;
 
-    #[Pure] private function __construct(PersistentArray $items)
+    #[Pure] final protected function __construct(PersistentArray $items)
     {
         $this->itemsArray = $items;
     }
@@ -46,7 +48,7 @@ trait TypedArrayBasedTrait
     }
 
     /** @throws UnableToSetValue */
-    private function guardSet(mixed $item): void
+    protected function guardSet(mixed $item): void
     {
         if (!is_a($item, $this->type())) {
             throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $this->type());
@@ -56,18 +58,27 @@ trait TypedArrayBasedTrait
     /** @throws UnableToSetValue */
     private function guardArraySet(array $items): void
     {
-        $type = $this->type();
-
-        foreach($items as $item) {
-            if (!is_a($item, $type)) {
-                throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $type);
-            }
-        }
+        each(
+            $items,
+            fn ($item) => $this->assertIsACorrectTypeOrFail()($item)
+        );
     }
 
     /** @throws UnableToRetrieveValue */
     public function peek(int $position): mixed
     {
         return $this->itemsArray->peek($position);
+    }
+
+    private function assertIsACorrectTypeOrFail(): Closure
+    {
+        return function ($item) {
+            assertIsAOr(
+                $this->type(),
+                function ($item, $type) {
+                    throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $type);
+                }
+            )($item);
+        };
     }
 }

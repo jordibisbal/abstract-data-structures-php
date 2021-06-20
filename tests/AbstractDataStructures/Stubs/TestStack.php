@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace AbstractDataStructures\Tests\Stubs;
 
-use AbstractDataStructures\Collection;
+use AbstractDataStructures\Stack;
 
-/**
- * @extends Collection<TestItem>
- */
-class TestCollection extends Collection
+final class TestStack extends Stack
 {
     public function type(): string
     {

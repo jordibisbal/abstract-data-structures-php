@@ -10,7 +10,6 @@ use AbstractDataStructures\Tests\Stubs\TestQueue;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertNull;
 use function PHPUnit\Framework\assertTrue;
 
 final class QueueTest extends testCase
@@ -20,10 +19,20 @@ final class QueueTest extends testCase
         assertTrue(TestQueue::createEmpty()->isEmpty());
     }
 
-    public function testFirstAndLastItemsOfAnEmptyCollectionAreNull(): void
+    public function testHeadOfAnEmptyCollectionThrowException(): void
     {
-        assertNull(TestQueue::createEmpty()->head());
-        assertNull(TestQueue::createEmpty()->tail());
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Unable to retrieve values as the structure is empty.');
+
+        TestQueue::createEmpty()->head();
+    }
+
+    public function testTailOfAnEmptyCollectionThrowException(): void
+    {
+        $this->expectException(UnableToRetrieveValue::class);
+        $this->expectExceptionMessage('Unable to retrieve values as the structure is empty.');
+
+        TestQueue::createEmpty()->tail();
     }
 
     public function testCanBeCreatedFromAnArray(): void
