@@ -55,9 +55,9 @@ final class PersistentDictionary implements Countable, ArrayAccess
      * @return PersistentDictionary<T>
      * @phpstan-pure
      */
-    public static function fromArray(array $items): PersistentDictionary
+    public static function fromArray(array $items, BucketRouter $bucketRouter = null): PersistentDictionary
     {
-        return new self($items, new BucketRouter(self::SHARD_DEPTH));
+        return new self($items, $bucketRouter ?? new BucketRouter(self::SHARD_DEPTH));
     }
 
     /**
