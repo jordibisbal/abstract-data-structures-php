@@ -207,39 +207,28 @@ final class CollectionTest extends testCase
         assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
     }
 
+    /**
+     * This test is really flaky as it depends on implementation details of PersistentCollect, as the sharding
+     * mechanism that influences a lot on the memory usage per item
+     * Used mainly to tune the sharding algorithm
+     */
     public function testMemorySizeIsBigButAddingOneDoesNotDuplicatesMemoryConsumptionForASingleCluster(): void
     {
         $count = 1000;
-        $clusterSize = 16;
-        $collectionLinkedListSize = 2 * $this->doubleLinkedListOverhead()[0];
 
-        gc_collect_cycles();
-        $memoryWatermark = memory_get_usage();
-        $collection = TestCollection::fromArray(map(
-            range(1, $count),
-            fn ($int) => new TestItem((string) $int)
-        ));
+        $memoryWatermark = $this->getMemoryUse();
+        $itemsArray = map(range(1, $count), fn ($int) => new TestItem((string)$int));
+        $collection = TestCollection::fromArray($itemsArray);
 
-        gc_collect_cycles();
-        $memoryUsed = memory_get_usage() - $memoryWatermark;
-        $estimatedElementSize = $memoryUsed / $count;
+        $memoryUsedByCollection = $this->getMemoryUse() - $memoryWatermark;
         $newCollection = $collection->append(new TestItem('new value'));
-        gc_collect_cycles();
-        $memoryUsedAfterAppendingOne = memory_get_usage() - $memoryWatermark;
-        $testItem = new TestItem('');
-        $memoryUsedByTestItem = memory_get_usage() - $memoryUsedAfterAppendingOne;
+        $memoryUsedAfterAppendingOne = $this->getMemoryUse() - $memoryWatermark;
 
         assertCount($count, $collection);
+        assertEquals($itemsArray, $collection->asArray());
         assertCount($count + 1, $newCollection);
-        self::assertGreaterThanOrEqual(1100, $estimatedElementSize);
 
-        self::assertLessThanOrEqual($memoryUsedByTestItem + $collectionLinkedListSize, $estimatedElementSize);
-        self::assertLessThanOrEqual(1300, $estimatedElementSize);
-        self::assertLessThanOrEqual(
-            $clusterSize * 2 * $estimatedElementSize,
-            $memoryUsedAfterAppendingOne - $memoryUsed
-        );
-        assertEquals('', $testItem->value);
+        $this->assertMemoryIncreaseIsBelowTenPercent($memoryUsedAfterAppendingOne, $memoryUsedByCollection);
     }
 
     /** @phpstan-return array<int | string, TestItem> */
@@ -266,18 +255,18 @@ final class CollectionTest extends testCase
     }
 
     /**
-     * @return array<mixed>
+     * @return int
      */
-    private function doubleLinkedListOverhead(): array
+    private function getMemoryUse(): int
     {
-        $memoryWatermark = memory_get_usage();
-        $testVariable = [];
-        $count = 1000;
-        foreach (range(1, $count) as $value) {
-            $testVariable[]= [0 => 'index',1 => 'index'];
-        }
-        $usedMemory = (memory_get_usage() - $memoryWatermark) / $count;
+        gc_collect_cycles();
+        return memory_get_usage();
+    }
 
-        return [$usedMemory, $testVariable];
+    private function assertMemoryIncreaseIsBelowTenPercent(
+        int $memoryUsedAfterAppendingOne,
+        int $memoryUsedByCollection
+    ): void {
+        self::assertLessThan(1.1, $memoryUsedAfterAppendingOne / $memoryUsedByCollection);
     }
 }

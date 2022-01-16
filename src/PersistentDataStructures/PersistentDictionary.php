@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures\PersistentDataStructures;
@@ -8,7 +9,6 @@ use Countable;
 use j45l\either\Failure;
 use j45l\either\None;
 use j45l\either\Reason;
-use JetBrains\PhpStorm\Pure;
 use function Functional\each;
 
 /**
@@ -21,7 +21,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     private const SHARD_DEPTH = 4;
 
     /** @var array<key, mixed> */
-    private array $nodes;
+    private array $bucket;
 
     private int $nextIndex;
 
@@ -33,12 +33,15 @@ final class PersistentDictionary implements Countable, ArrayAccess
     /** @var key  */
     private int | string | null $last;
 
+    private BucketRouter $bucketRouter;
+
     /**
      * @param array<T> $items
      */
-    private function __construct(array $items)
+    private function __construct(array $items, BucketRouter $bucketRouter)
     {
-        $this->nodes = [];
+        $this->bucketRouter = $bucketRouter;
+        $this->bucket = [];
         $this->first = null;
         $this->last = null;
         $this->count = 0;
@@ -54,7 +57,15 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public static function fromArray(array $items): PersistentDictionary
     {
-        return new self($items);
+        return new self($items, new BucketRouter(self::SHARD_DEPTH));
+    }
+
+    /**
+     * @return PersistentDictionary<T>
+     */
+    public function withBucketRouter(BucketRouter $bucketRouter): PersistentDictionary
+    {
+        return new self($this->asArray(), $bucketRouter);
     }
 
     /**
@@ -108,7 +119,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     public function hasKey(int | string $offset): bool
     {
-        return array_key_exists($offset, $this->getLeafArray($offset));
+        return array_key_exists($offset, $this->getLeafBucket($offset));
     }
 
     /**
@@ -123,10 +134,10 @@ final class PersistentDictionary implements Countable, ArrayAccess
         $new = clone $this;
         $new->count--;
 
-        $nodes = &$new->createLeafArray($key);
+        $bucket = &$new->createLeafBucket($key);
 
-        $new->setPriorNext($new, $key);
-        $new->unsetNode($nodes, $key);
+        $new->setPreviousNext($new, $key);
+        $new->unsetNode($bucket, $key);
 
         return $new;
     }
@@ -147,7 +158,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         $newArray = $this->asArray();
         uasort($newArray, $sort);
 
-        return new self($newArray);
+        return new self($newArray, $this->bucketRouter);
     }
 
     /** @return array<T> */
@@ -162,67 +173,57 @@ final class PersistentDictionary implements Countable, ArrayAccess
     }
 
     /**
-     * @return array<string>
-     */
-    private function getLeafPath(int | string $index): array
-    {
-        return str_split(substr((md5((string) $index)), 1, self::SHARD_DEPTH));
-    }
-
-    /**
      * @phpstan-impure
      * @phpstan-return array<key, mixed>
-     * @noinspection PhpPureAttributeCanBeAddedInspection
      */
-    private function &createLeafArray(mixed $index): array
+    private function &createLeafBucket(mixed $index): array
     {
-        $items = &$this->nodes;
+        $bucket = &$this->bucket;
 
-        foreach ($this->getLeafPath($index) as $branch) {
-            if (!array_key_exists($branch, $items)) {
-                $items[$branch] = [];
+        foreach ($this->bucketRouter->getBuckets((string) $index) as $branch) {
+            if (!array_key_exists($branch, $bucket)) {
+                $bucket[$branch] = [];
             }
-            $items = &$items[$branch];
+            $bucket = &$bucket[$branch];
         }
 
-        return $items;
+        return $bucket;
     }
 
     /**
      * @return array<Node>
-     * @noinspection PhpPureAttributeCanBeAddedInspection
      */
-    private function &getLeafArray(mixed $index): array
+    private function &getLeafBucket(mixed $index): array
     {
-        $items = &$this->nodes;
+        $bucket = &$this->bucket;
 
-        foreach ($this->getLeafPath($index) as $branch) {
-            if (!array_key_exists($branch, $items)) {
+        foreach ($this->bucketRouter->getBuckets((string) $index) as $branch) {
+            if (!array_key_exists($branch, $bucket)) {
                 $array = [];
                 return $array;
             }
-            $items = &$items[$branch];
+            $bucket = &$bucket[$branch];
         }
 
-        return $items;
+        return $bucket;
     }
 
     /**
      * @param int | string  $offset
      */
-    #[Pure] public function offsetExists(mixed $offset): bool
+    public function offsetExists(mixed $offset): bool
     {
-        /** @var array<T> $items */
-        $items = &$this->nodes;
+        /** @var array<T> $bucket */
+        $bucket = &$this->bucket;
 
-        foreach ($this->getLeafPath($offset) as $branch) {
-            if (!array_key_exists($branch, $items)) {
+        foreach ($this->bucketRouter->getBuckets((string) $offset) as $branch) {
+            if (!array_key_exists($branch, $bucket)) {
                 return false;
             }
-            $items = &$items[$branch];
+            $bucket = &$bucket[$branch];
         }
 
-        return array_key_exists($offset, $items);
+        return array_key_exists($offset, $bucket);
     }
 
     /**
@@ -231,7 +232,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     private function getNode(int | string $offset): mixed
     {
-        return $this->getLeafArray($offset)[$offset];
+        return $this->getLeafBucket($offset)[$offset];
     }
 
     /**
@@ -240,29 +241,29 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public function offsetGet($offset): mixed
     {
-        if (!array_key_exists($offset, $this->getLeafArray($offset))) {
+        if (!array_key_exists($offset, $this->getLeafBucket($offset))) {
             return Failure::from(
                 Reason::from(sprintf('Element with index [%s] does not exist.', (string) $offset))
             );
         }
 
-        return $this->getLeafArray($offset)[$offset]->value();
+        return $this->getLeafBucket($offset)[$offset]->value();
     }
 
     private function setNode(mixed $key, mixed $value): void
     {
-        $nodes = &$this->createLeafArray($key);
+        $bucket = &$this->createLeafBucket($key);
 
         $this->updateNextIndex($key);
 
-        if (array_key_exists($key, $nodes) && ($nodes[$key] === $value)) {
+        if (array_key_exists($key, $bucket) && ($bucket[$key] === $value)) {
             return;
         }
 
-        $newArray = $nodes;
+        $newBucket = $bucket;
         $node = new Node(null, null, $value);
 
-        if (!array_key_exists($key, $newArray)) {
+        if (!array_key_exists($key, $newBucket)) {
             $this->count++;
             $node = new Node($this->last, null, $value);
 
@@ -270,8 +271,8 @@ final class PersistentDictionary implements Countable, ArrayAccess
             $this->updateLastWhenAdding($this, $key);
         }
 
-        $newArray[$key] = $node;
-        $nodes = $newArray;
+        $newBucket[$key] = $node;
+        $bucket = $newBucket;
     }
 
     /**
@@ -318,10 +319,10 @@ final class PersistentDictionary implements Countable, ArrayAccess
     private function updateLastWhenAdding(PersistentDictionary $dictionary, int | string $key): void
     {
         if (!is_null($dictionary->last)) {
-            $lastNodes = &$dictionary->getLeafArray($this->last);
-            $newLastNodes = $lastNodes;
-            $newLastNodes[$dictionary->last] = $newLastNodes[$dictionary->last]->withNext($key);
-            $lastNodes = $newLastNodes;
+            $lastBucket = &$dictionary->getLeafBucket($this->last);
+            $newLastBucket = $lastBucket;
+            $newLastBucket[$dictionary->last] = $newLastBucket[$dictionary->last]->withNext($key);
+            $lastBucket = $newLastBucket;
         }
 
         $dictionary->last = $key;
@@ -330,35 +331,35 @@ final class PersistentDictionary implements Countable, ArrayAccess
     /**
      * @param PersistentDictionary<T> $dictionary
      */
-    private function setPriorNext(PersistentDictionary $dictionary, int | string $key): void
+    private function setPreviousNext(PersistentDictionary $dictionary, int | string $key): void
     {
-        $nodes = &$dictionary->createLeafArray($key);
+        $bucket = &$dictionary->createLeafBucket($key);
 
-        $prior = $nodes[$key]->prior();
-        $next = $nodes[$key]->next();
+        $prior = $bucket[$key]->previous();
+        $next = $bucket[$key]->next();
 
         if (!is_null($prior)) {
-            $nodesPrior = &$dictionary->getLeafArray($prior);
-            $nodes = $nodesPrior;
-            $nodes[$prior] = $nodes[$prior]->withNext($next);
-            $nodesPrior = $nodes;
+            $priorBucket = &$dictionary->getLeafBucket($prior);
+            $bucket = $priorBucket;
+            $bucket[$prior] = $bucket[$prior]->withNext($next);
+            $priorBucket = $bucket;
         }
 
         if (!is_null($next)) {
-            $nodesNext = &$dictionary->getLeafArray($next);
-            $nodes = $nodesNext;
-            $nodes[$next] = $nodes[$next]->withPrior($prior);
-            $nodesNext = $nodes;
+            $nextBucket = &$dictionary->getLeafBucket($next);
+            $bucket = $nextBucket;
+            $bucket[$next] = $bucket[$next]->withPrevious($prior);
+            $nextBucket = $bucket;
         }
     }
 
     /**
-     * @param array<int | string, Node> $nodes
+     * @param array<int | string, Node> $bucket
      */
-    private function unsetNode(array &$nodes, int | string $key): void
+    private function unsetNode(array &$bucket, int | string $key): void
     {
-        $newNodes = $nodes;
+        $newNodes = $bucket;
         unset($newNodes[$key]);
-        $nodes = $newNodes;
+        $bucket = $newNodes;
     }
 }
