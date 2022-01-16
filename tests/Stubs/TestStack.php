@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures\Tests\Stubs;
+namespace j45l\AbstractDataStructures\Tests\Stubs;
 
-use AbstractDataStructures\Stack;
+use j45l\AbstractDataStructures\Stack;
 
 final class TestStack extends Stack
 {

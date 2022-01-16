@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures;
+namespace j45l\AbstractDataStructures;
 
 use Countable;
 use JetBrains\PhpStorm\Immutable;

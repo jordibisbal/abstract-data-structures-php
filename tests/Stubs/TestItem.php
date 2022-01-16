@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures\Tests\Stubs;
+namespace j45l\AbstractDataStructures\Tests\Stubs;
 
 final class TestItem
 {

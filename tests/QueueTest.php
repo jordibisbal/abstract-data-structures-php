@@ -1,12 +1,13 @@
 <?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
 declare(strict_types=1);
 
-namespace AbstractDataStructures\Tests;
+namespace j45l\AbstractDataStructures\Tests;
 
-use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
-use AbstractDataStructures\Exceptions\UnableToSetValue;
-use AbstractDataStructures\Tests\Stubs\TestItem;
-use AbstractDataStructures\Tests\Stubs\TestQueue;
+use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
+use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
+use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
+use j45l\AbstractDataStructures\Tests\Stubs\TestQueue;
+use j45l\either\None;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertEquals;
@@ -151,7 +152,7 @@ final class QueueTest extends testCase
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
             'Unable to set value as the given item is of type string but '
-            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+            . 'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
         TestQueue::fromArray($this->aWrongTypedArray());
@@ -162,7 +163,7 @@ final class QueueTest extends testCase
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
             'Unable to set value as the given item is of type string but '
-            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+            . 'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
         TestQueue::createEmpty()->queue('wrong');

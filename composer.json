@@ -18,11 +18,13 @@
             "url": "https://github.com/jordibisbal/functional-php"
         }
     ],
+    "minimum-stability": "RC",
     "require": {
         "php": "~8",
         "lstrojny/functional-php": "^1.17",
-        "jordibisbal/functional-php": "@dev",
-        "infection/infection": "^0.23.0"
+        "infection/infection": "^0.23.0",
+        "j45l/either-php": "^0.1.1@RC",
+        "j45l/functional-php": "^0.1.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -30,17 +32,19 @@
         "phpunit/phpunit": "^7.0 || ^8.0 || ^9.5",
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpmd/phpmd": "^2.10",
-        "phpstan/phpstan": "^0.12.88",
-        "jetbrains/phpstorm-attributes": "^1.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "AbstractDataStructures\\": "src/AbstractDataStructures"
-        }
+        "jetbrains/phpstorm-attributes": "^1.0",
+        "phpstan/phpstan": "1.4.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpstan/extension-installer": "^1.1"
     },
     "autoload-dev": {
         "psr-4": {
-            "AbstractDataStructures\\Tests\\": "tests/AbstractDataStructures"
+            "j45l\\AbstractDataStructures\\Tests\\": "tests"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "j45l\\AbstractDataStructures\\": "src"
         }
     },
     "scripts": {

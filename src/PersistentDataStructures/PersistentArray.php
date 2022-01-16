@@ -1,23 +1,30 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures\PersistentDataStructures;
+namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
-use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
-use AbstractDataStructures\Exceptions\UnableToRotateValues;
-use AbstractDataStructures\Exceptions\UnableToSwapValues;
+use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
+use j45l\AbstractDataStructures\Exceptions\UnableToRotateValues;
+use j45l\AbstractDataStructures\Exceptions\UnableToSwapValues;
 use JetBrains\PhpStorm\Pure;
 use function Functional\each;
 
+/** @template T */
 final class PersistentArray
 {
+    /** @var array<T>  */
     private array $items;
 
+    /** @param array<T> $items */
     private function __construct(array $items)
     {
         $this->items = $items;
     }
 
+    /**
+     * @param array<T> $items
+     * @return PersistentArray<T>
+     */
     #[Pure] public static function fromArray(array $items): PersistentArray
     {
         return new self($items);
@@ -32,7 +39,11 @@ final class PersistentArray
 
         return $this->items[$key];
     }
-    
+
+    /**
+     * @param T $value
+     * @return PersistentArray<T>
+     */
     #[Pure] public function set(string $key, mixed $value): PersistentArray
     {
         $newArray = new self($this->items);
@@ -46,6 +57,10 @@ final class PersistentArray
         return count($this->items);
     }
 
+    /**
+     * @param T $value
+     * @return PersistentArray<T>
+     */
     #[Pure] public function append(mixed $value): PersistentArray
     {
         $newArray = new self($this->items);
@@ -55,7 +70,10 @@ final class PersistentArray
         return $newArray;
     }
 
-    #[Pure] public function last(): mixed
+    /**
+     * @throws UnableToRetrieveValue
+     */
+    public function last(): mixed
     {
         if ($this->count() === 0) {
             throw UnableToRetrieveValue::becauseTheStructureIsEmpty();
@@ -83,7 +101,11 @@ final class PersistentArray
         ));
     }
 
-    #[Pure] public function first(): mixed
+    /**
+     * @phpstan-return T | false
+     * @throws UnableToRetrieveValue
+     */
+    public function first(): mixed
     {
         if ($this->count() === 0) {
             throw UnableToRetrieveValue::becauseTheStructureIsEmpty();
@@ -97,6 +119,9 @@ final class PersistentArray
         return array_key_exists($offset, $this->items);
     }
 
+    /**
+     * @return PersistentArray<T>
+     */
     public function unset(string $key): PersistentArray
     {
         if (!array_key_exists($key, $this->items)) {
@@ -114,6 +139,9 @@ final class PersistentArray
         each($this->items, $fn);
     }
 
+    /**
+     * @return PersistentArray<T>
+     */
     public function sort(callable $sort): PersistentArray
     {
         $newArray = $this->items;
@@ -122,11 +150,17 @@ final class PersistentArray
         return new self($newArray);
     }
 
+    /**
+     * @return array<T>
+     */
     public function asArray(): array
     {
         return $this->items;
     }
 
+    /**
+     * @phpstan-return array<mixed>
+     */
     public function pop(): array
     {
         if (count($this->items) === 0) {
@@ -138,14 +172,22 @@ final class PersistentArray
         return [new self($newItems), $item];
     }
 
-    public function push(mixed $item): PersistentArray
+    /**
+     * @param T $item
+     * @return PersistentArray<T>
+     */
+    #[Pure] public function push(mixed $item): PersistentArray
     {
         $newItems = $this->items;
-        array_push($newItems, $item);
+        $newItems[] = $item;
 
         return new self($newItems);
     }
 
+    /**
+     * @param T $item
+     * @return PersistentArray<T>
+     */
     public function unshift(mixed $item): PersistentArray
     {
         $newItems = $this->items;
@@ -154,20 +196,26 @@ final class PersistentArray
         return new self($newItems);
     }
 
+    /**
+     * @return PersistentArray<T>
+     */
     public function swap(): PersistentArray
     {
         if (count($this->items) < 2) {
             throw UnableToSwapValues::becauseThereIsNotEnoughItemsInTheStructure(count($this->items));
         }
-        
+
         $newItems = $this->items;
 
         $newItems[0] = $this->items[1];
         $newItems[1] = $this->items[0];
-        
+
         return new self($newItems);
     }
 
+    /**
+     * @return PersistentArray<T>
+     */
     public function rotate(): PersistentArray
     {
         if (count($this->items) < 3) {

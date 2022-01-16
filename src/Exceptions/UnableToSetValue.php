@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures\Exceptions;
+namespace j45l\AbstractDataStructures\Exceptions;
 
 final class UnableToSetValue extends AbstractDataStructureException
 {

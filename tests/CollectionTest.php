@@ -1,0 +1,283 @@
+<?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
+declare(strict_types=1);
+
+namespace j45l\AbstractDataStructures\Tests;
+
+use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
+use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
+use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
+use j45l\either\Failure;
+use JetBrains\PhpStorm\Pure;
+use PHPUnit\Framework\TestCase;
+use function Functional\map;
+use function PHPUnit\Framework\assertCount;
+use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertFalse;
+use function PHPUnit\Framework\assertTrue;
+
+final class CollectionTest extends testCase
+{
+    public function testCanBeCreatedEmpty(): void
+    {
+        assertTrue(TestCollection::createEmpty()->isEmpty());
+    }
+
+    public function testAnItemCanBeAddedToACollection(): void
+    {
+        $collection = TestCollection::createEmpty();
+        $originalCollection = $collection;
+        $newCollection = $collection->append(new TestItem('test'));
+
+        assertFalse($newCollection->isEmpty());
+        assertCount(1, $newCollection);
+        assertEquals($originalCollection, TestCollection::createEmpty());
+    }
+
+    public function testAnItemCanBeRetrievedByKey(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        $item = $collection->get('b');
+
+        self::assertInstanceOf(TestItem::class, $item);
+        assertEquals('B', $item->value);
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testWhenRetrievingANonExistingAFailureIsReturned(): void
+    {
+        $collection = TestCollection::createEmpty();
+        $originalCollection = $collection;
+
+        $failure = $collection->get('b');
+
+        self::assertInstanceOf(Failure::class, $failure);
+        assertEquals('Element with index [b] does not exist.', $failure->reason()->asString());
+        assertEquals($originalCollection, TestCollection::createEmpty());
+    }
+
+    public function testAnItemCanBeSetByKey(): void
+    {
+        $collection = TestCollection::createEmpty();
+        $originalCollection = $collection;
+
+        $collection = $collection->set('key', new TestItem('value'));
+
+        $item = $collection->get('key');
+
+        self::assertInstanceOf(TestItem::class, $item);
+        assertEquals('value', $item->value);
+        assertEquals($originalCollection, TestCollection::createEmpty());
+    }
+
+    public function testTheValuesCanBeRetrieved(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        assertEquals(array_values($this->anArray()), $collection->values());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testTheKeysCanBeRetrieved(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        assertEquals(['a', 'b', 'c'], $collection->keys());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testTheCollectionCanBeSortedByValue(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        $sort = fn ($a, $b) => $b <=> $a;
+        $collection = $collection->sort($sort);
+        $array = $this->anArray();
+        uasort($array, $sort);
+
+        assertEquals(array_values($array), $collection->values());
+        assertEquals(array_keys($array), $collection->keys());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testTheCollectionIsImmutableToSorting(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        $collection->sort(fn ($a, $b) => $b <=> $a);
+
+        assertEquals(array_keys($this->anArray()), $collection->keys());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testAnItemCanBeRemovedByKey(): void
+    {
+        $collection = TestCollection::fromArray($this->aMixedKeysArray());
+        $originalCollection = $collection;
+
+        $collection = $collection->remove(1);
+        $collection = $collection->remove('b');
+        $array = $this->aMixedKeysArray();
+
+        unset($array['b'], $array[1]);
+
+        assertEquals(array_keys($array), $collection->keys());
+        assertEquals(array_values($array), $collection->values());
+        assertCount(4, $collection);
+
+        assertEquals(TestCollection::fromArray($this->aMixedKeysArray()), $originalCollection);
+    }
+
+    public function testRemovingAnNonexistentKeyProducesNoEffect(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        $collection = $collection->remove('nonexistent');
+
+        assertEquals(array_keys($this->anArray()), $collection->keys());
+        assertEquals(array_values($this->anArray()), $collection->values());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testACollectionCanBeCheckForAKeyExistence(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        assertTrue($collection->hasKey('b'));
+        assertFalse($collection->hasKey('d'));
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testAnExceptionIsThrownIfTheAppendedElementIsNotOfTheProperType(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type string but ' .
+            'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        TestCollection::createEmpty()->append('string');
+    }
+
+    public function testAnExceptionIsThrownIfTheSetElementIsNotOfTheProperType(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type string but ' .
+            'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        TestCollection::createEmpty()->set('', 'string');
+    }
+
+    public function testACollectionCanBeRetrievedAsArray(): void
+    {
+        assertEquals($this->anArray(), TestCollection::fromArray($this->anArray())->asArray());
+    }
+
+    public function testAnArrayCanBeIterated(): void
+    {
+        $collectedItems = [];
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        $collection->foreach(
+            function (TestItem $item, $key) use (&$collectedItems): void {
+                $collectedItems[$key] = $item;
+            }
+        );
+
+        assertEquals($this->anArray(), $collectedItems);
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testSizeIsCount(): void
+    {
+        $collection = TestCollection::fromArray($this->anArray());
+        $originalCollection = $collection;
+
+        assertEquals($collection->count(), $collection->size());
+        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+    }
+
+    public function testMemorySizeIsBigButAddingOneDoesNotDuplicatesMemoryConsumptionForASingleCluster(): void
+    {
+        $count = 1000;
+        $clusterSize = 16;
+        $collectionLinkedListSize = 2 * $this->doubleLinkedListOverhead()[0];
+
+        gc_collect_cycles();
+        $memoryWatermark = memory_get_usage();
+        $collection = TestCollection::fromArray(map(
+            range(1, $count),
+            fn ($int) => new TestItem((string) $int)
+        ));
+
+        gc_collect_cycles();
+        $memoryUsed = memory_get_usage() - $memoryWatermark;
+        $estimatedElementSize = $memoryUsed / $count;
+        $newCollection = $collection->append(new TestItem('new value'));
+        gc_collect_cycles();
+        $memoryUsedAfterAppendingOne = memory_get_usage() - $memoryWatermark;
+        $testItem = new TestItem('');
+        $memoryUsedByTestItem = memory_get_usage() - $memoryUsedAfterAppendingOne;
+
+        assertCount($count, $collection);
+        assertCount($count + 1, $newCollection);
+        self::assertGreaterThanOrEqual(1100, $estimatedElementSize);
+
+        self::assertLessThanOrEqual($memoryUsedByTestItem + $collectionLinkedListSize, $estimatedElementSize);
+        self::assertLessThanOrEqual(1300, $estimatedElementSize);
+        self::assertLessThanOrEqual(
+            $clusterSize * 2 * $estimatedElementSize,
+            $memoryUsedAfterAppendingOne - $memoryUsed
+        );
+        assertEquals('', $testItem->value);
+    }
+
+    /** @phpstan-return array<int | string, TestItem> */
+    #[Pure] private function anArray(): array
+    {
+        return [
+            'a' => new TestItem('A'),
+            'b' => new TestItem('B'),
+            'c' => new TestItem('C')
+         ];
+    }
+
+    /** @phpstan-return array<int | string, TestItem> */
+    #[Pure] private function aMixedKeysArray(): array
+    {
+        return [
+            'a' => new TestItem('A'),
+            'b' => new TestItem('B'),
+            'c' => new TestItem('C'),
+            0 => new TestItem('0'),
+            1 => new TestItem('1'),
+            2 => new TestItem('2')
+        ];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function doubleLinkedListOverhead(): array
+    {
+        $memoryWatermark = memory_get_usage();
+        $testVariable = [];
+        $count = 1000;
+        foreach (range(1, $count) as $value) {
+            $testVariable[]= [0 => 'index',1 => 'index'];
+        }
+        $usedMemory = (memory_get_usage() - $memoryWatermark) / $count;
+
+        return [$usedMemory, $testVariable];
+    }
+}

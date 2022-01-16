@@ -29,20 +29,20 @@
         "@extensions": true,
         "IncrementInteger": {
             "ignore": [
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first",
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::last",
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::pop",
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first",
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::last",
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::pop",
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
             ]
         },
         "UnwrapArraySlice": {
             "ignore": [
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first"
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::first"
             ]
         },
         "GreaterThanOrEqualTo": {
             "ignore":[
-                "AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
+                "j45l\\AbstractDataStructures\\PersistentDataStructures\\PersistentArray::peek"
             ]
         }
     }

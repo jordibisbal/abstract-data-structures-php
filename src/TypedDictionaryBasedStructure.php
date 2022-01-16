@@ -1,23 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures;
+namespace j45l\AbstractDataStructures;
 
-use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
-use AbstractDataStructures\Exceptions\UnableToSetValue;
-use AbstractDataStructures\PersistentDataStructures\PersistentArray;
+use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
+use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use Closure;
 use JetBrains\PhpStorm\Pure;
 use function Functional\each;
-use function JBFunctional\assertIsAOr;
 
-abstract class TypedArrayBasedStructure
+/** @template T */
+abstract class TypedDictionaryBasedStructure
 {
-    protected PersistentArray $itemsArray;
+    /** @var PersistentDictionary<T>  */
+    protected PersistentDictionary $itemsArray;
 
     abstract public function type(): string;
 
-    #[Pure] final protected function __construct(PersistentArray $items)
+    /**
+     * @param PersistentDictionary<T> $items
+     */
+    final protected function __construct(PersistentDictionary $items)
     {
         $this->itemsArray = $items;
     }
@@ -32,12 +35,15 @@ abstract class TypedArrayBasedStructure
         return $this->count() === 0;
     }
 
-    /** @throws UnableToSetValue */
+    /**
+     * @param array<T> $items
+     * @throws UnableToSetValue
+     */
     public static function fromArray(array $items): static
     {
-        $dataStructure = new static(PersistentArray::fromArray([]));
+        $dataStructure = new static(PersistentDictionary::fromArray([]));
         $dataStructure->guardArraySet($items);
-        $dataStructure->itemsArray = PersistentArray::fromArray($items);
+        $dataStructure->itemsArray = PersistentDictionary::fromArray($items);
 
         return $dataStructure;
     }
@@ -47,7 +53,10 @@ abstract class TypedArrayBasedStructure
         return $this->itemsArray->count();
     }
 
-    /** @throws UnableToSetValue */
+    /**
+     * @param T $item
+     * @throws UnableToSetValue
+     */
     protected function guardSet(mixed $item): void
     {
         if (!is_a($item, $this->type())) {
@@ -55,7 +64,10 @@ abstract class TypedArrayBasedStructure
         }
     }
 
-    /** @throws UnableToSetValue */
+    /**
+     * @param array<T> $items
+     * @throws UnableToSetValue
+     */
     private function guardArraySet(array $items): void
     {
         each(
@@ -64,21 +76,17 @@ abstract class TypedArrayBasedStructure
         );
     }
 
-    /** @throws UnableToRetrieveValue */
-    public function peek(int $position): mixed
-    {
-        return $this->itemsArray->peek($position);
-    }
-
+    /**
+     * @throws UnableToSetValue
+     */
     private function assertIsACorrectTypeOrFail(): Closure
     {
         return function ($item) {
-            assertIsAOr(
-                $this->type(),
-                function ($item, $type) {
-                    throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $type);
-                }
-            )($item);
+            if (is_a($item, $this->type())) {
+                return;
+            }
+
+            throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $this->type());
         };
     }
 }

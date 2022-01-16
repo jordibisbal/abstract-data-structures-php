@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace AbstractDataStructures;
+namespace j45l\AbstractDataStructures;
 
 use Countable;
+use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
@@ -31,7 +32,10 @@ use JetBrains\PhpStorm\Pure;
         return $this->itemsArray->first();
     }
 
-    #[Pure] public function head(): mixed
+    /**
+     * @throws UnableToRetrieveValue
+     */
+    public function head(): mixed
     {
         return $this->itemsArray->last();
     }

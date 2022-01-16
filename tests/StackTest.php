@@ -1,14 +1,14 @@
 <?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
 declare(strict_types=1);
 
-namespace AbstractDataStructures\Tests;
+namespace j45l\AbstractDataStructures\Tests;
 
-use AbstractDataStructures\Exceptions\UnableToRetrieveValue;
-use AbstractDataStructures\Exceptions\UnableToRotateValues;
-use AbstractDataStructures\Exceptions\UnableToSetValue;
-use AbstractDataStructures\Exceptions\UnableToSwapValues;
-use AbstractDataStructures\Tests\Stubs\TestItem;
-use AbstractDataStructures\Tests\Stubs\TestStack;
+use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
+use j45l\AbstractDataStructures\Exceptions\UnableToRotateValues;
+use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
+use j45l\AbstractDataStructures\Exceptions\UnableToSwapValues;
+use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
+use j45l\AbstractDataStructures\Tests\Stubs\TestStack;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertEquals;
@@ -231,7 +231,7 @@ final class StackTest extends testCase
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
             'Unable to set value as the given item is of type string but '
-            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+            . 'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
         TestStack::fromArray($this->aWrongTypedArray());
@@ -242,12 +242,15 @@ final class StackTest extends testCase
         $this->expectException(UnableToSetValue::class);
         $this->expectExceptionMessage(
             'Unable to set value as the given item is of type string but '
-            . 'AbstractDataStructures\Tests\Stubs\TestItem expected.'
+            . 'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
         TestStack::createEmpty()->push('wrong');
     }
 
+    /**
+     * @phpstan-return array<string, TestItem>
+     */
     #[Pure] private function anArray(): array
     {
         return [
@@ -257,6 +260,9 @@ final class StackTest extends testCase
          ];
     }
 
+    /**
+     * @phpstan-return array<string, TestItem|string>
+     */
     #[Pure] private function aWrongTypedArray(): array
     {
         return [
