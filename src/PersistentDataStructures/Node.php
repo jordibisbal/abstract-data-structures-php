@@ -41,4 +41,9 @@ class Node
     {
         return new self($key, $this->next, $this->value);
     }
+
+    #[Pure] public function withValue(mixed $value): Node
+    {
+        return new self($this->previous, $this->next, $value);
+    }
 }

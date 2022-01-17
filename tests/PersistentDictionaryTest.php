@@ -2,6 +2,8 @@
 
 namespace j45l\AbstractDataStructures\Tests;
 
+use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
+use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use j45l\either\Failure;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +20,7 @@ class PersistentDictionaryTest extends TestCase
 
     /**
      * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
-     * @return array<array>
+     * @phpstan-return array<int|string, array<array<int|string, int|string>>>
      */
     public function simpleArraysProvider(): array
     {
@@ -46,17 +48,19 @@ class PersistentDictionaryTest extends TestCase
         assertCount(count($array), $persistentDictionary);
     }
 
-    public function testArrayElementsCanBeRetrieved(): void
+    /** @dataProvider bucketRouterProvider */
+    public function testArrayElementsCanBeRetrieved(BucketRouter $bucketRouter): void
     {
-        $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B']);
+        $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B'], $bucketRouter);
 
         assertEquals('a', $persistentDictionary[0]);
         assertEquals('B', $persistentDictionary['b']);
     }
 
-    public function testRetrievingAnNonexistentElementReturnsAFailure(): void
+    /** @dataProvider bucketRouterProvider */
+    public function testRetrievingAnNonexistentElementReturnsAFailure(BucketRouter $bucketRouter): void
     {
-        $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B']);
+        $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B'], $bucketRouter);
 
         $item = $persistentDictionary['c'];
 
@@ -64,9 +68,10 @@ class PersistentDictionaryTest extends TestCase
         assertEquals('Element with index [c] does not exist.', $item->reason()->asString());
     }
 
-    public function testModifyingDoesNotChangeOriginal(): void
+    /** @dataProvider bucketRouterProvider */
+    public function testModifyingDoesNotChangeOriginal(BucketRouter $bucketRouter): void
     {
-        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3]);
+        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3], $bucketRouter);
 
         $newPersistentDictionary = $persistentDictionary->set(1, 4);
 
@@ -74,18 +79,38 @@ class PersistentDictionaryTest extends TestCase
         assertEquals([1, 4, 3], $newPersistentDictionary->asArray());
     }
 
-    public function testItemsCanBeAdded(): void
+    /**
+     * @return array<string, array<int, BucketRouter>>
+     * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
+     */
+    public function bucketRouterProvider(): array
     {
-        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3]);
+        return [
+            'standardRouter' => [new BucketRouter(4)],
+            'memoizedRouter' => [new MemoizedBucketRouter(4)],
+            'singleBucketRouter' => [new class(4) extends BucketRouter {
+                protected function expand(string $index): array
+                {
+                    return [0, 0, 0, 0];
+                }
+            }]
+        ];
+    }
+
+    /** @dataProvider bucketRouterProvider */
+    public function testItemsCanBeAdded(BucketRouter $bucketRouter): void
+    {
+        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3], $bucketRouter);
 
         $persistentDictionary = $persistentDictionary->append(4);
 
         assertEquals([1, 2, 3, 4], $persistentDictionary->asArray());
     }
 
-    public function testSettingItemWithIntIndexModifiesNextIndex(): void
+    /** @dataProvider bucketRouterProvider */
+    public function testSettingItemWithIntIndexModifiesNextIndex(BucketRouter $bucketRouter): void
     {
-        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3]);
+        $persistentDictionary = PersistentDictionary::fromArray([1, 2, 3], $bucketRouter);
 
         $persistentDictionary = $persistentDictionary->set(5, 5);
         $persistentDictionary = $persistentDictionary->append(4);

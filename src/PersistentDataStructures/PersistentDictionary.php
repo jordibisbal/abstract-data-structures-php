@@ -9,7 +9,11 @@ use Countable;
 use j45l\either\Failure;
 use j45l\either\None;
 use j45l\either\Reason;
+use JetBrains\PhpStorm\Pure;
+use function array_key_exists;
 use function Functional\each;
+use function is_int;
+use function is_null;
 
 /**
  * @template T
@@ -18,12 +22,12 @@ use function Functional\each;
  */
 final class PersistentDictionary implements Countable, ArrayAccess
 {
-    private const SHARD_DEPTH = 4;
+    private const BUCKET_DEPTH = 4;
 
     /** @var array<key, mixed> */
     private array $bucket;
 
-    private int $nextIndex;
+    private int $nextIntKey;
 
     private int $count;
 
@@ -45,7 +49,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         $this->first = null;
         $this->last = null;
         $this->count = 0;
-        $this->nextIndex = 0;
+        $this->nextIntKey = 0;
 
         each($items, fn ($value, $key) => $this->setNode($key, $value));
     }
@@ -57,7 +61,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public static function fromArray(array $items, BucketRouter $bucketRouter = null): PersistentDictionary
     {
-        return new self($items, $bucketRouter ?? new BucketRouter(self::SHARD_DEPTH));
+        return new self($items, $bucketRouter ?? new BucketRouter(self::BUCKET_DEPTH));
     }
 
     /**
@@ -74,10 +78,10 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public function set(int | string $key, mixed $value): PersistentDictionary
     {
-        $newArray = clone $this;
-        $newArray->setNode($key, $value);
+        $dictionary = clone $this;
+        $dictionary->setNode($key, $value);
 
-        return $newArray;
+        return $dictionary;
     }
 
     public function count(): int
@@ -92,7 +96,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     public function append(mixed $value): PersistentDictionary
     {
         $newArray = clone $this;
-        $newArray->setNode($newArray->getNextIndex(), $value);
+        $newArray->setNode($newArray->getNextIntKey(), $value);
 
         return $newArray;
     }
@@ -117,7 +121,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return $this->offsetGet($this->first);
     }
 
-    public function hasKey(int | string $offset): bool
+    #[Pure] public function hasKey(int | string $offset): bool
     {
         return array_key_exists($offset, $this->getLeafBucket($offset));
     }
@@ -142,7 +146,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return $new;
     }
 
-    public function each(callable $fn): void
+    #[Pure]public function each(callable $fn): void
     {
         $key = $this->first;
         while ($key !== null) {
@@ -161,10 +165,12 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return new self($newArray, $this->bucketRouter);
     }
 
-    /** @return array<T> */
-    public function asArray(): array
+    /** @return array<T>
+     */
+    #[Pure] public function asArray(): array
     {
         $collected = [];
+        /** @noinspection PhpExpressionResultUnusedInspection */
         $this->each(function ($item, $key) use (&$collected) {
             $collected[$key] = $item;
         });
@@ -175,6 +181,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     /**
      * @phpstan-impure
      * @phpstan-return array<key, mixed>
+     * @noinspection PhpPureAttributeCanBeAddedInspection
      */
     private function &createLeafBucket(mixed $index): array
     {
@@ -193,7 +200,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     /**
      * @return array<Node>
      */
-    private function &getLeafBucket(mixed $index): array
+    #[Pure] private function &getLeafBucket(mixed $index): array
     {
         $bucket = &$this->bucket;
 
@@ -211,7 +218,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     /**
      * @param int | string  $offset
      */
-    public function offsetExists(mixed $offset): bool
+    #[Pure] public function offsetExists(mixed $offset): bool
     {
         /** @var array<T> $bucket */
         $bucket = &$this->bucket;
@@ -230,7 +237,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
      * @param int | string $offset
      * @phpstan-return Node
      */
-    private function getNode(int | string $offset): mixed
+    #[Pure] private function getNode(int | string $offset): mixed
     {
         return $this->getLeafBucket($offset)[$offset];
     }
@@ -252,27 +259,14 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     private function setNode(mixed $key, mixed $value): void
     {
+        /** @var array<int | string, Node> $bucket */
         $bucket = &$this->createLeafBucket($key);
-
-        $this->updateNextIndex($key);
-
         if (array_key_exists($key, $bucket) && ($bucket[$key] === $value)) {
             return;
         }
 
-        $newBucket = $bucket;
-        $node = new Node(null, null, $value);
-
-        if (!array_key_exists($key, $newBucket)) {
-            $this->count++;
-            $node = new Node($this->last, null, $value);
-
-            $this->updateFirstWhenAdding($this, $key);
-            $this->updateLastWhenAdding($this, $key);
-        }
-
-        $newBucket[$key] = $node;
-        $bucket = $newBucket;
+        $this->updateNextIntKey($key);
+        $this->setNodeValue($bucket, $this->getOrAddNode($this, $bucket, $key), $value, $key);
     }
 
     /**
@@ -290,15 +284,15 @@ final class PersistentDictionary implements Countable, ArrayAccess
     {
     }
 
-    private function getNextIndex(): int
+    private function getNextIntKey(): int
     {
-        return $this->nextIndex;
+        return $this->nextIntKey;
     }
 
-    private function updateNextIndex(int | string $key): void
+    private function updateNextIntKey(int | string $key): void
     {
         if (is_int($key)) {
-            $this->nextIndex = max($key, $this->nextIndex) + 1;
+            $this->nextIntKey = max($key, $this->nextIntKey) + 1;
         }
     }
 
@@ -361,5 +355,34 @@ final class PersistentDictionary implements Countable, ArrayAccess
         $newNodes = $bucket;
         unset($newNodes[$key]);
         $bucket = $newNodes;
+    }
+
+    /**
+     * @param PersistentDictionary<T> $dictionary
+     * @param array<key, Node> $bucket
+     */
+    private function getOrAddNode(PersistentDictionary $dictionary, array $bucket, mixed $key): Node
+    {
+        if (array_key_exists($key, $bucket)) {
+            return $bucket[$key];
+        }
+
+        $this->count++;
+        $node = new Node($this->last, null, null);
+
+        $dictionary->updateFirstWhenAdding($this, $key);
+        $dictionary->updateLastWhenAdding($this, $key);
+
+        return $node;
+    }
+
+    /**
+     * @param array<key, Node> $bucket
+     */
+    private function setNodeValue(array &$bucket, Node $node, mixed $value, mixed $key): void
+    {
+        $newBucket = $bucket;
+        $newBucket[$key] = $node->withValue($value);
+        $bucket = $newBucket;
     }
 }

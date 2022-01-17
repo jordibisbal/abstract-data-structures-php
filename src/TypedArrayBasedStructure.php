@@ -9,7 +9,6 @@ use j45l\AbstractDataStructures\PersistentDataStructures\PersistentArray;
 use Closure;
 use JetBrains\PhpStorm\Pure;
 use function Functional\each;
-use function JBFunctional\assertIsAOr;
 
 /** @template T */
 abstract class TypedArrayBasedStructure
@@ -78,15 +77,17 @@ abstract class TypedArrayBasedStructure
         return $this->itemsArray->peek($position);
     }
 
+    /**
+     * @throws UnableToSetValue
+     */
     private function assertIsACorrectTypeOrFail(): Closure
     {
         return function ($item) {
-            assertIsAOr(
-                $this->type(),
-                function ($item, $type) {
-                    throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $type);
-                }
-            )($item);
+            if (is_a($item, $this->type())) {
+                return;
+            }
+
+            throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $this->type());
         };
     }
 }

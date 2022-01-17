@@ -2,9 +2,14 @@
 
 namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
+use JetBrains\PhpStorm\Pure;
+use function array_slice;
+use function ord;
+use function strlen;
+
 class BucketRouter
 {
-    private int $bucketsDepth;
+    protected int $bucketsDepth;
 
     public function __construct(int $bucketsDepth)
     {
@@ -14,15 +19,16 @@ class BucketRouter
     /**
      * @return array<int>
      */
-    public function getBuckets(string $index): array
+    #[Pure] public function getBuckets(string $index): array
     {
         return $this->fold($this->expand($index));
     }
 
     /**
      * @phpstan-return array<int>
+     * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
      */
-    private function expand(string $index): array
+    #[Pure]protected function expand(string $index): array
     {
         // Expand the index char by char, by splitting low and high nibble of its ascii code
         $expanded = [];
@@ -32,6 +38,9 @@ class BucketRouter
             $expanded[] = $character & 0x0f;
             $expanded[] = $character >> 4;
         }
+
+        // Remove first level
+        array_shift($expanded);
 
         // Pad with 0s
         while (count($expanded) < $this->bucketsDepth) {
@@ -44,8 +53,9 @@ class BucketRouter
     /**
      * @phpstan-param array<int> $index
      * @phpstan-return array<int>
+     * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
      */
-    private function fold(array $index): array
+    #[Pure] private function fold(array $index): array
     {
         // Folds the string by XORing the characters by module of the length
         $folded = array_slice($index, 0, $this->bucketsDepth);

@@ -11,6 +11,7 @@ use JetBrains\PhpStorm\Pure;
 /**
  * @template T
  * @extends TypedDictionaryBasedStructure<T>
+ * @phpstan-type key int | string | null
  */
 #[Immutable] abstract class Collection extends TypedDictionaryBasedStructure implements Countable
 {
@@ -27,13 +28,11 @@ use JetBrains\PhpStorm\Pure;
         return $this->itemsArray[$key];
     }
 
-
     public function set(string $key, mixed $value): static
     {
         $this->guardSet($value);
         return new static($this->itemsArray->set($key, $value));
     }
-
 
     public function remove(int | string $key): static
     {
@@ -43,16 +42,16 @@ use JetBrains\PhpStorm\Pure;
         return $new;
     }
 
-
     public function append(mixed $value): static
     {
         $this->guardSet($value);
         return new static($this->itemsArray->append($value));
     }
 
-    public function foreach(callable $fn): void
+    public function foreach(callable $callable): void
     {
-        $this->itemsArray->each($fn);
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        $this->itemsArray->each($callable);
     }
 
     /**
@@ -63,12 +62,15 @@ use JetBrains\PhpStorm\Pure;
         return array_values($this->asArray());
     }
 
-    public function sort(callable $sortFn): static
+    public function sort(callable $comparisonCallable): static
     {
-        return new static($this->itemsArray->sort($sortFn));
+        return new static($this->itemsArray->sort($comparisonCallable));
     }
 
-    public function keys(): array
+    /**
+     * @phpstan-return array<key>
+     */
+    #[Pure] public function keys(): array
     {
         return array_keys($this->asArray());
     }
@@ -80,7 +82,6 @@ use JetBrains\PhpStorm\Pure;
     {
         return $this->itemsArray->asArray();
     }
-
 
     #[Pure] public function size(): int
     {
