@@ -18,6 +18,7 @@ abstract class TypedArrayBasedStructure
 
     abstract public function type(): string;
 
+    /** @param PersistentArray<T> $items */
     #[Pure] final protected function __construct(PersistentArray $items)
     {
         $this->itemsArray = $items;
