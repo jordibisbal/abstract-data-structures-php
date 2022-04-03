@@ -20,7 +20,7 @@ use function is_null;
  * @implements ArrayAccess<int | string, T>
  * @phpstan-type key int | string | null
  */
-class PersistentDictionary implements Countable, ArrayAccess
+final class PersistentDictionary implements Countable, ArrayAccess
 {
     private const BUCKET_DEPTH = 4;
 
