@@ -6,9 +6,9 @@ namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
 use ArrayAccess;
 use Countable;
-use j45l\either\Failure;
-use j45l\either\None;
-use j45l\either\Reason;
+use j45l\maybe\DoTry\Failure;
+use j45l\maybe\DoTry\Reason;
+use j45l\maybe\None;
 use JetBrains\PhpStorm\Pure;
 use function array_key_exists;
 use function Functional\each;
@@ -250,7 +250,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
     {
         if (!array_key_exists($offset, $this->getLeafBucket($offset))) {
             return Failure::from(
-                Reason::from(sprintf('Element with index [%s] does not exist.', (string) $offset))
+                Reason::fromString(sprintf('Element with index [%s] does not exist.', $offset))
             );
         }
 

@@ -7,7 +7,6 @@ use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
 use j45l\AbstractDataStructures\Tests\Stubs\TestQueue;
-use j45l\either\None;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertEquals;

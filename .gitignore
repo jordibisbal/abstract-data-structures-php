@@ -1,7 +1,6 @@
 build/
 vendor/
 .php_cs.cache
-composer.lock
 .idea/
 .phpunit.result.cache
 /.phpcs-cache

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
-use j45l\either\Failure;
+use j45l\maybe\DoTry\Failure;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 

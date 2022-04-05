@@ -6,7 +6,7 @@ namespace j45l\AbstractDataStructures\Tests;
 use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
-use j45l\either\Failure;
+use j45l\maybe\DoTry\Failure;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function Functional\map;
@@ -53,7 +53,7 @@ final class CollectionTest extends testCase
         $failure = $collection->get('b');
 
         self::assertInstanceOf(Failure::class, $failure);
-        assertEquals('Element with index [b] does not exist.', $failure->reason()->asString());
+        assertEquals('Element with index [b] does not exist.', $failure->reason()->toString());
         assertEquals($originalCollection, TestCollection::createEmpty());
     }
 

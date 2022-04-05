@@ -5,7 +5,7 @@ namespace j45l\AbstractDataStructures\Tests;
 use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
-use j45l\either\Failure;
+use j45l\maybe\DoTry\Failure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
@@ -65,7 +65,7 @@ class PersistentDictionaryTest extends TestCase
         $item = $persistentDictionary['c'];
 
         self::assertInstanceOf(Failure::class, $item);
-        assertEquals('Element with index [c] does not exist.', $item->reason()->asString());
+        assertEquals('Element with index [c] does not exist.', $item->reason()->toString());
     }
 
     /** @dataProvider bucketRouterProvider */

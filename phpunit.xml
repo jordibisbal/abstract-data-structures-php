@@ -4,6 +4,7 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          backupGlobals="false" colors="true"
          bootstrap="tests/bootstrap.php"
+         cacheResultFile="build/cache/phpunit.result"
 >
   <coverage processUncoveredFiles="true">
     <include>

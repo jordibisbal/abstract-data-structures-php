@@ -13,9 +13,9 @@
     ],
     "minimum-stability": "RC",
     "require": {
-        "php": "~8",
+        "php": "~8.1",
         "lstrojny/functional-php": "^1.17",
-        "j45l/either-php": "*",
+        "j45l/maybe-php": "*",
         "infection/infection": "^0.26.5"
     },
     "require-dev": {
@@ -43,5 +43,11 @@
         "tests": "vendor/bin/phpunit",
         "coding-style": "vendor/bin/phpcs && vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php_cs.dist",
         "clear": "rm -rf vendor/"
+    },
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true,
+            "phpstan/extension-installer": true
+        }
     }
 }
