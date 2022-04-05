@@ -6,6 +6,7 @@ use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use j45l\maybe\DoTry\Failure;
+use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
@@ -89,7 +90,7 @@ class PersistentDictionaryTest extends TestCase
             'standardRouter' => [new BucketRouter(4)],
             'memoizedRouter' => [new MemoizedBucketRouter(4)],
             'singleBucketRouter' => [new class(4) extends BucketRouter {
-                protected function expand(string $index): array
+                #[Pure] protected function expand(string $index): array
                 {
                     return [0, 0, 0, 0];
                 }

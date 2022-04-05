@@ -94,7 +94,7 @@ use JetBrains\PhpStorm\Pure;
      * @param T $value
      * @return static
      */
-    private function unkeyedAppend($value): Collection
+    private function unkeyedAppend(mixed $value): Collection
     {
         $this->guardSet($value);
         return new static($this->itemsArray->append($value));

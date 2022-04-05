@@ -18,6 +18,7 @@ class BucketRouter
 
     /**
      * @return array<int>
+     * @noinspection PhpAttributeCanBeAddedToOverriddenMemberInspection
      */
     #[Pure] public function getBuckets(string $index): array
     {

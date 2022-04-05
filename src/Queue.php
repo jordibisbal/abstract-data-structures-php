@@ -27,7 +27,7 @@ use JetBrains\PhpStorm\Pure;
         return [new static($itemsArray), $item];
     }
 
-    #[Pure] public function tail(): mixed
+    public function tail(): mixed
     {
         return $this->itemsArray->first();
     }

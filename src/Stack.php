@@ -26,7 +26,7 @@ use JetBrains\PhpStorm\Pure;
         return [new static($itemsArray), $item];
     }
 
-    #[Pure] public function top(): mixed
+    public function top(): mixed
     {
         return $this->itemsArray->last();
     }

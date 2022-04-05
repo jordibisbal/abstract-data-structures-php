@@ -9,6 +9,7 @@ class MemoizedBucketRouter extends BucketRouter
 {
     /**
      * @return array<int>
+     * @phpstan-impure
      */
     public function getBuckets(string $index): array
     {
