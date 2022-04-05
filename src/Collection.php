@@ -44,8 +44,10 @@ use JetBrains\PhpStorm\Pure;
 
     public function append(mixed $value): static
     {
-        $this->guardSet($value);
-        return new static($this->itemsArray->append($value));
+        return match (true) {
+            $value instanceof Unique => self::set($value->getUniqueKey(), $value),
+            default => $this->unkeyedAppend($value)
+        };
     }
 
     public function foreach(callable $callable): void
@@ -86,5 +88,15 @@ use JetBrains\PhpStorm\Pure;
     #[Pure] public function size(): int
     {
         return $this->count();
+    }
+
+    /**
+     * @param T $value
+     * @return static
+     */
+    private function unkeyedAppend($value): Collection
+    {
+        $this->guardSet($value);
+        return new static($this->itemsArray->append($value));
     }
 }
