@@ -1,2 +1,2 @@
 #!/bin/sh
-vendor/bin/phpunit
+XDEBUG_MODE=off "$( dirname -- "${BASH_SOURCE[0]}" )"/../vendor/bin/phpunit "$@"

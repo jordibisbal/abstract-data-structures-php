@@ -25,7 +25,8 @@ abstract class TypedDictionaryBasedStructure
         $this->itemsArray = $items;
     }
 
-    public static function createEmpty(): static
+    /** @noinspection PhpPureFunctionMayProduceSideEffectsInspection */
+    #[Pure] public static function createEmpty(): static
     {
         return static::fromArray([]);
     }

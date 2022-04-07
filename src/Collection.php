@@ -21,11 +21,22 @@ use JetBrains\PhpStorm\Pure;
     }
 
     /**
-     * @return T | Failure
+     * @return T | Failure<T>
      */
     public function get(string $key)
     {
         return $this->itemsArray[$key];
+    }
+
+    /**
+     * @phpstan-param callable(string, static): static $callable
+     */
+    public function onHasNotKey(string $key, callable $callable): mixed
+    {
+        return match (true) {
+            $this->hasKey($key) => $this,
+            default => $callable($key, $this),
+        };
     }
 
     public function set(string $key, mixed $value): static
@@ -42,6 +53,7 @@ use JetBrains\PhpStorm\Pure;
         return $new;
     }
 
+    /** @param T $value */
     public function append(mixed $value): static
     {
         return match (true) {

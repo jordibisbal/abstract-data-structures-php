@@ -244,7 +244,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     /**
      * @param int | string $offset
-     * @phpstan-return T | Failure
+     * @phpstan-return T | Failure<T>
      */
     public function offsetGet($offset): mixed
     {
