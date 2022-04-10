@@ -7,6 +7,7 @@ use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
 use j45l\maybe\DoTry\Failure;
+use j45l\maybe\DoTry\Success;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function Functional\map;
@@ -40,8 +41,9 @@ final class CollectionTest extends testCase
 
         $item = $collection->get('b');
 
-        self::assertInstanceOf(TestItem::class, $item);
-        assertEquals('B', $item->value);
+        self::assertInstanceOf(Success::class, $item);
+        self::assertInstanceOf(TestItem::class, $item->get());
+        assertEquals('B', $item->get()->value);
         assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
     }
 
@@ -53,7 +55,10 @@ final class CollectionTest extends testCase
         $failure = $collection->get('b');
 
         self::assertInstanceOf(Failure::class, $failure);
-        assertEquals('Element with index [b] does not exist.', $failure->reason()->toString());
+        assertEquals(
+            'Unable to retrieve element because the collection has not he requested key (b)',
+            $failure->reason()->toString()
+        );
         assertEquals($originalCollection, TestCollection::createEmpty());
     }
 
@@ -66,8 +71,9 @@ final class CollectionTest extends testCase
 
         $item = $collection->get('key');
 
-        self::assertInstanceOf(TestItem::class, $item);
-        assertEquals('value', $item->value);
+        self::assertInstanceOf(Success::class, $item);
+        self::assertInstanceOf(TestItem::class, $item->get());
+        assertEquals('value', $item->get()->value);
         assertEquals($originalCollection, TestCollection::createEmpty());
     }
 

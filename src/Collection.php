@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
+use j45l\AbstractDataStructures\FailureReasons\UnableToRetrieve;
 use j45l\maybe\DoTry\Failure;
+use j45l\maybe\DoTry\Success;
+use j45l\maybe\Maybe;
+use j45l\maybe\Some;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
@@ -21,22 +25,26 @@ use JetBrains\PhpStorm\Pure;
     }
 
     /**
-     * @return T | Failure<T>
+     * @return Maybe<T>
      */
-    public function get(string $key)
+    public function get(string $key): Maybe
     {
-        return $this->itemsArray[$key];
+        return $this->hasKey($key)
+            ? Success::from($this->itemsArray[$key])
+            : Failure::from(UnableToRetrieve::becauseTheCollectionHasNotTheRequestedKey($key))
+        ;
     }
 
     /**
-     * @phpstan-param callable(string, static): static $callable
+     * @param T $default;
+     * @return T
      */
-    public function onHasNotKey(string $key, callable $callable): mixed
+    public function getOr(string $key, mixed $default)
     {
-        return match (true) {
-            $this->hasKey($key) => $this,
-            default => $callable($key, $this),
-        };
+        return $this->hasKey($key)
+            ? Success::from($this->itemsArray[$key])->get()
+            : $default
+        ;
     }
 
     public function set(string $key, mixed $value): static
