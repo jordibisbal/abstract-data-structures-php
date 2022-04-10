@@ -2,7 +2,7 @@
 
 namespace j45l\AbstractDataStructures;
 
-interface Unique
+interface UniqueIndexed
 {
     public function getUniqueKey(): string;
 }

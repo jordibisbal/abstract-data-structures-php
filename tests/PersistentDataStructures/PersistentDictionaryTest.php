@@ -1,6 +1,6 @@
 <?php
 
-namespace j45l\AbstractDataStructures\Tests;
+namespace j45l\AbstractDataStructures\Tests\PersistentDataStructures;
 
 use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
@@ -54,8 +54,8 @@ class PersistentDictionaryTest extends TestCase
     {
         $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B'], $bucketRouter);
 
-        assertEquals('a', $persistentDictionary[0]);
-        assertEquals('B', $persistentDictionary['b']);
+        assertEquals('a', $persistentDictionary[0]->getOrElse(null));
+        assertEquals('B', $persistentDictionary['b']->getOrElse(null));
     }
 
     /** @dataProvider bucketRouterProvider */
@@ -66,7 +66,10 @@ class PersistentDictionaryTest extends TestCase
         $item = $persistentDictionary['c'];
 
         self::assertInstanceOf(Failure::class, $item);
-        assertEquals('Element with index [c] does not exist.', $item->reason()->toString());
+        assertEquals(
+            'Unable to retrieve element because the data structure has not the requested key (c).',
+            $item->reason()->toString()
+        );
     }
 
     /** @dataProvider bucketRouterProvider */
@@ -87,8 +90,8 @@ class PersistentDictionaryTest extends TestCase
     public function bucketRouterProvider(): array
     {
         return [
-            'standardRouter' => [new BucketRouter(4)],
-            'memoizedRouter' => [new MemoizedBucketRouter(4)],
+            'standardRouter' => [BucketRouter::create(4)],
+            'memoizedRouter' => [MemoizedBucketRouter::create(4)],
             'singleBucketRouter' => [new class(4) extends BucketRouter {
                 #[Pure] protected function expand(string $index): array
                 {
@@ -117,5 +120,24 @@ class PersistentDictionaryTest extends TestCase
         $persistentDictionary = $persistentDictionary->append(4);
 
         assertEquals([1, 2, 3, 5 => 5, 6 => 4], $persistentDictionary->asArray());
+    }
+
+    public function testSettingAKeyAsIntegerIsThgeSameAsUsingTheString(): void
+    {
+        $persistentDictionary = PersistentDictionary::fromArray([1 => 41]);
+        $persistentDictionary =
+            $persistentDictionary->set('1', $persistentDictionary->offsetGet('1')->getOrElse(1) + 1);
+
+        assertEquals(42, $persistentDictionary->offsetGet(1)->getOrElse(null));
+    }
+
+    public function testGettingANonexistentElementFailRegardingOfTheKeyType(): void
+    {
+        $persistentDictionary = PersistentDictionary::fromArray([]);
+
+        $failureOnInt = $persistentDictionary->offsetGet(42);
+        $failureOnString = $persistentDictionary->offsetGet('42');
+
+        assertEquals($failureOnInt, $failureOnString);
     }
 }

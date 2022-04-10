@@ -11,9 +11,14 @@ class BucketRouter
 {
     protected int $bucketsDepth;
 
-    public function __construct(int $bucketsDepth)
+    final public function __construct(int $bucketsDepth)
     {
         $this->bucketsDepth = $bucketsDepth;
+    }
+
+    #[Pure] public static function create(int $bucketsDepth): static
+    {
+        return new static($bucketsDepth);
     }
 
     /**
@@ -29,7 +34,7 @@ class BucketRouter
      * @phpstan-return array<int>
      * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
      */
-    #[Pure]protected function expand(string $index): array
+    #[Pure] protected function expand(string $index): array
     {
         // Expand the index char by char, by splitting low and high nibble of its ascii code
         $expanded = [];
@@ -44,6 +49,7 @@ class BucketRouter
         array_shift($expanded);
 
         // Pad with 0s
+        /** @infection-ignore-all */
         while (count($expanded) < $this->bucketsDepth) {
             $expanded[] = 0;
         }
@@ -61,7 +67,7 @@ class BucketRouter
         // Folds the string by XORing the characters by module of the length
         $folded = array_slice($index, 0, $this->bucketsDepth);
         $count = count($index);
-        for ($i = $this->bucketsDepth - 1; $i < $count; $i++) {
+        for ($i = $this->bucketsDepth; $i < $count; $i++) {
             $folded[$i % $this->bucketsDepth] ^= $index[$i];
         }
 

@@ -29,22 +29,7 @@ use JetBrains\PhpStorm\Pure;
      */
     public function get(string $key): Maybe
     {
-        return $this->hasKey($key)
-            ? Success::from($this->itemsArray[$key])
-            : Failure::from(UnableToRetrieve::becauseTheCollectionHasNotTheRequestedKey($key))
-        ;
-    }
-
-    /**
-     * @param T $default;
-     * @return T
-     */
-    public function getOr(string $key, mixed $default)
-    {
-        return $this->hasKey($key)
-            ? Success::from($this->itemsArray[$key])->get()
-            : $default
-        ;
+        return $this->itemsArray->offsetGet($key);
     }
 
     public function set(string $key, mixed $value): static
@@ -65,7 +50,7 @@ use JetBrains\PhpStorm\Pure;
     public function append(mixed $value): static
     {
         return match (true) {
-            $value instanceof Unique => self::set($value->getUniqueKey(), $value),
+            $value instanceof UniqueIndexed => self::set($value->getUniqueKey(), $value),
             default => $this->unkeyedAppend($value)
         };
     }

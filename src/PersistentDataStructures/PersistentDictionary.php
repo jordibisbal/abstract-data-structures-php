@@ -6,9 +6,11 @@ namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
 use ArrayAccess;
 use Countable;
+use j45l\AbstractDataStructures\FailureReasons\UnableToRetrieve;
 use j45l\maybe\DoTry\Failure;
-use j45l\maybe\DoTry\Reason;
+use j45l\maybe\Maybe;
 use j45l\maybe\None;
+use j45l\maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use function array_key_exists;
 use function Functional\each;
@@ -61,7 +63,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public static function fromArray(array $items, BucketRouter $bucketRouter = null): PersistentDictionary
     {
-        return new self($items, $bucketRouter ?? new BucketRouter(self::BUCKET_DEPTH));
+        return new self($items, $bucketRouter ?? BucketRouter::create(self::BUCKET_DEPTH));
     }
 
     /**
@@ -244,17 +246,16 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     /**
      * @param int | string $offset
-     * @phpstan-return T | Failure<T>
+     * @phpstan-return Maybe<T>
      */
     public function offsetGet($offset): mixed
     {
-        if (!array_key_exists($offset, $this->getLeafBucket($offset))) {
-            return Failure::from(
-                Reason::fromString(sprintf('Element with index [%s] does not exist.', $offset))
-            );
-        }
-
-        return $this->getLeafBucket($offset)[$offset]->value();
+        return match (true) {
+            array_key_exists($offset, $this->getLeafBucket($offset)) =>
+                Some::from($this->getLeafBucket($offset)[$offset]->value()),
+            default =>
+                Failure::from(UnableToRetrieve::becauseTheStructureHasNotTheRequestedKey((string) $offset))
+        };
     }
 
     private function setNode(mixed $key, mixed $value): void

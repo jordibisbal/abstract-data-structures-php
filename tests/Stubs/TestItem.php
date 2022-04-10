@@ -3,9 +3,16 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures\Tests\Stubs;
 
-final class TestItem
+use JetBrains\PhpStorm\Pure;
+
+class TestItem
 {
-    public function __construct(public string $value)
+    final public function __construct(public string $value)
     {
+    }
+
+    #[Pure] public static function create(string $value): static
+    {
+        return new static($value);
     }
 }

@@ -13,6 +13,10 @@ class MemoizedBucketRouter extends BucketRouter
      */
     public function getBuckets(string $index): array
     {
-        return memoize(fn ($index) => parent::getBuckets($index), [$index], [self::class, $index]);
+        return memoize(
+            fn ($index) => parent::getBuckets($index),
+            [$index],
+            [self::class, $this->bucketsDepth, $index]
+        );
     }
 }

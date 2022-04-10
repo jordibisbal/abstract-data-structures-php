@@ -6,8 +6,9 @@ namespace j45l\AbstractDataStructures\Tests;
 use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
+use j45l\AbstractDataStructures\Tests\Stubs\UniqueIndexedTestItem;
 use j45l\maybe\DoTry\Failure;
-use j45l\maybe\DoTry\Success;
+use j45l\maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function Functional\map;
@@ -41,7 +42,7 @@ final class CollectionTest extends testCase
 
         $item = $collection->get('b');
 
-        self::assertInstanceOf(Success::class, $item);
+        self::assertInstanceOf(Some::class, $item);
         self::assertInstanceOf(TestItem::class, $item->get());
         assertEquals('B', $item->get()->value);
         assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
@@ -56,7 +57,7 @@ final class CollectionTest extends testCase
 
         self::assertInstanceOf(Failure::class, $failure);
         assertEquals(
-            'Unable to retrieve element because the collection has not he requested key (b)',
+            'Unable to retrieve element because the data structure has not the requested key (b).',
             $failure->reason()->toString()
         );
         assertEquals($originalCollection, TestCollection::createEmpty());
@@ -71,7 +72,7 @@ final class CollectionTest extends testCase
 
         $item = $collection->get('key');
 
-        self::assertInstanceOf(Success::class, $item);
+        self::assertInstanceOf(Some::class, $item);
         self::assertInstanceOf(TestItem::class, $item->get());
         assertEquals('value', $item->get()->value);
         assertEquals($originalCollection, TestCollection::createEmpty());
@@ -169,6 +170,7 @@ final class CollectionTest extends testCase
             'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
+        // @phpstan-ignore-next-line
         TestCollection::createEmpty()->append('string');
     }
 
@@ -274,5 +276,35 @@ final class CollectionTest extends testCase
         int $memoryUsedByCollection
     ): void {
         self::assertLessThan(1.1, $memoryUsedAfterAppendingOne / $memoryUsedByCollection);
+    }
+
+    public function testWhenCreatingFromAWrongTypedArrayItFails(): void
+    {
+        $this->expectException(UnableToSetValue::class);
+        $this->expectExceptionMessage(
+            'Unable to set value as the given item is of type integer but ' .
+            'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
+        );
+
+        // @phpstan-ignore-next-line
+        TestCollection::fromArray([42]);
+    }
+
+    public function testAppendingAnElementTwiceAppendItTwice(): void
+    {
+        $collection = TestCollection::fromArray([]);
+        $collection = $collection->append(TestItem::create('42'));
+        $collection = $collection->append(TestItem::create('42'));
+
+        assertCount(2, $collection);
+    }
+
+    public function testAppendingAnUniqueElementTwiceAppendItJustOnce(): void
+    {
+        $collection = TestCollection::fromArray([]);
+        $collection = $collection->append(UniqueIndexedTestItem::create('42'));
+        $collection = $collection->append(UniqueIndexedTestItem::create('42'));
+
+        assertCount(1, $collection);
     }
 }
