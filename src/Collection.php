@@ -4,11 +4,7 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
-use j45l\AbstractDataStructures\FailureReasons\UnableToRetrieve;
-use j45l\maybe\DoTry\Failure;
-use j45l\maybe\DoTry\Success;
 use j45l\maybe\Maybe;
-use j45l\maybe\Some;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
@@ -30,6 +26,16 @@ use JetBrains\PhpStorm\Pure;
     public function get(string $key): Maybe
     {
         return $this->itemsArray->offsetGet($key);
+    }
+
+    /**
+     * @template DT
+     * @param DT $default
+     * @return T | DT
+     */
+    public function getOrElse(string $key, mixed $default)
+    {
+        return $this->itemsArray->offsetGet($key)->getOrElse($default);
     }
 
     public function set(string $key, mixed $value): static
@@ -103,5 +109,13 @@ use JetBrains\PhpStorm\Pure;
     {
         $this->guardSet($value);
         return new static($this->itemsArray->append($value));
+    }
+
+    public function onHasNotKey(string $key, callable $fn, mixed $default = null): mixed
+    {
+        return match (true) {
+            $this->hasKey($key) => $default,
+            default => $fn()
+        };
     }
 }
