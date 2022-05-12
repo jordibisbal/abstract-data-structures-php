@@ -8,9 +8,13 @@ use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
+/**
+ * @template T
+ * @extends TypedArrayBasedStructure<T>
+ */
 #[Immutable] abstract class Queue extends TypedArrayBasedStructure implements Countable
 {
-
+    /** @param T $item */
     public function queue(mixed $item): static
     {
         $this->guardSet($item);
@@ -20,6 +24,7 @@ use JetBrains\PhpStorm\Pure;
         return new static($itemsArray);
     }
 
+    /** @return array{Queue<T>, T}  */
     public function dequeue(): array
     {
         [$itemsArray, $item] = $this->itemsArray->pop();
@@ -27,12 +32,17 @@ use JetBrains\PhpStorm\Pure;
         return [new static($itemsArray), $item];
     }
 
+    /**
+     * @return T
+     * @throws UnableToRetrieveValue
+     */
     public function tail(): mixed
     {
         return $this->itemsArray->first();
     }
 
     /**
+     * @return T
      * @throws UnableToRetrieveValue
      */
     public function head(): mixed

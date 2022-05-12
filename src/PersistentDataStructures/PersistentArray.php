@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
+use _PHPStan_cbb796380\React\Promise\Exception\LengthException;
 use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use j45l\AbstractDataStructures\Exceptions\UnableToRotateValues;
 use j45l\AbstractDataStructures\Exceptions\UnableToSwapValues;
@@ -102,7 +103,7 @@ final class PersistentArray
     }
 
     /**
-     * @phpstan-return T | false
+     * @phpstan-return T
      * @throws UnableToRetrieveValue
      */
     public function first(): mixed
@@ -111,7 +112,12 @@ final class PersistentArray
             throw UnableToRetrieveValue::becauseTheStructureIsEmpty();
         }
 
-        return current(array_slice($this->items, 0, 1));
+        $result = current(array_slice($this->items, 0, 1));
+        if ($result === false) {
+            throw new LengthException('Unable to get current element in first subarray');
+        }
+
+        return $result;
     }
 
     public function hasKey(string $offset): bool
