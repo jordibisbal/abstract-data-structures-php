@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures;
 
+use Generator;
 use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentArray;
 use Closure;
 use JetBrains\PhpStorm\Pure;
+
 use function Functional\each;
 
 /** @template T */
@@ -90,5 +92,13 @@ abstract class TypedArrayBasedStructure
 
             throw UnableToSetValue::becauseTheItemIsNotOfTheProperType($item, $this->type());
         };
+    }
+
+    /** @return Generator<T> */
+    public function yield(): Generator
+    {
+        foreach ($this->itemsArray->asArray() as $value) {
+            yield $value;
+        }
     }
 }
