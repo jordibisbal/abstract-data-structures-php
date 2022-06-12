@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
-use j45l\maybe\Maybe;
+use j45l\maybe\Maybe\Maybe;
+use j45l\maybe\Optional\Optional;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
@@ -21,9 +22,9 @@ use JetBrains\PhpStorm\Pure;
     }
 
     /**
-     * @return Maybe<T>
+     * @return Optional<T>
      */
-    public function get(string $key): Maybe
+    public function get(string $key): Optional
     {
         return $this->itemsArray->offsetGet($key);
     }
@@ -56,7 +57,7 @@ use JetBrains\PhpStorm\Pure;
     public function append(mixed $value): static
     {
         return match (true) {
-            $value instanceof UniqueIndexed => self::set($value->getUniqueKey(), $value),
+            $value instanceof UniqueIndexed => $this->set($value->getUniqueKey(), $value),
             default => $this->unkeyedAppend($value)
         };
     }

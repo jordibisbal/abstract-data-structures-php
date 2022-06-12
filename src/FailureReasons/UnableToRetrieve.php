@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures\FailureReasons;
 
-use j45l\maybe\DoTry\Reason;
+use j45l\maybe\Either\Reason;
 use JetBrains\PhpStorm\Pure;
 
 final class UnableToRetrieve extends Reason

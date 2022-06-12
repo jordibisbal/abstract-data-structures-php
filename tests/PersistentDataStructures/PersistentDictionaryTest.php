@@ -5,7 +5,7 @@ namespace j45l\AbstractDataStructures\Tests\PersistentDataStructures;
 use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
-use j45l\maybe\DoTry\Failure;
+use j45l\maybe\Either\Failure;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertCount;
@@ -122,7 +122,7 @@ class PersistentDictionaryTest extends TestCase
         assertEquals([1, 2, 3, 5 => 5, 6 => 4], $persistentDictionary->asArray());
     }
 
-    public function testSettingAKeyAsIntegerIsThgeSameAsUsingTheString(): void
+    public function testSettingAKeyAsIntegerIsTheSameAsUsingTheString(): void
     {
         $persistentDictionary = PersistentDictionary::fromArray([1 => 41]);
         $persistentDictionary =

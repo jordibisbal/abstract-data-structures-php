@@ -7,10 +7,10 @@ namespace j45l\AbstractDataStructures\PersistentDataStructures;
 use ArrayAccess;
 use Countable;
 use j45l\AbstractDataStructures\FailureReasons\UnableToRetrieve;
-use j45l\maybe\DoTry\Failure;
-use j45l\maybe\Maybe;
-use j45l\maybe\None;
-use j45l\maybe\Some;
+use j45l\maybe\Either\Failure;
+use j45l\maybe\Maybe\None;
+use j45l\maybe\Optional\Optional;
+use j45l\maybe\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use function array_key_exists;
 use function Functional\each;
@@ -33,10 +33,10 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     private int $count;
 
-    /** @var key */
+    /** @phpstan-var key */
     private int | string | null $first;
 
-    /** @var key  */
+    /** @phpstan-var key  */
     private int | string | null $last;
 
     private BucketRouter $bucketRouter;
@@ -246,7 +246,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     /**
      * @param int | string $offset
-     * @phpstan-return Maybe<T>
+     * @phpstan-return Optional<T>
      */
     public function offsetGet($offset): mixed
     {
@@ -254,7 +254,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
             array_key_exists($offset, $this->getLeafBucket($offset)) =>
                 Some::from($this->getLeafBucket($offset)[$offset]->value()),
             default =>
-                Failure::from(UnableToRetrieve::becauseTheStructureHasNotTheRequestedKey((string) $offset))
+                Failure::because(UnableToRetrieve::becauseTheStructureHasNotTheRequestedKey((string) $offset))
         };
     }
 
