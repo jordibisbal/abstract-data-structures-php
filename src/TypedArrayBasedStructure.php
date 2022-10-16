@@ -97,8 +97,8 @@ abstract class TypedArrayBasedStructure
     /** @return Generator<T> */
     public function yield(): Generator
     {
-        foreach ($this->itemsArray->asArray() as $value) {
-            yield $value;
+        foreach ($this->itemsArray->asArray() as $key => $value) {
+            yield $key => $value;
         }
     }
 }
