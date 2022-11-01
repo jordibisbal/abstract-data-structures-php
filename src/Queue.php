@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
+use Generator;
 use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
@@ -53,5 +54,12 @@ use JetBrains\PhpStorm\Pure;
     #[Pure] public function length(): int
     {
         return $this->count();
+    }
+
+    public function yield(): Generator
+    {
+        foreach (array_reverse($this->itemsArray->asArray(), true) as $key => $value) {
+            yield $key => $value;
+        }
     }
 }

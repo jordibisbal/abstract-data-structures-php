@@ -236,4 +236,12 @@ final class PersistentArray
 
         return new self($newItems);
     }
+
+    /**
+     * @return PersistentArray<T>
+     */
+    public function reverse(): PersistentArray
+    {
+        return new self(array_reverse($this->asArray()));
+    }
 }

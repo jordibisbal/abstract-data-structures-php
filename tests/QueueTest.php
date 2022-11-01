@@ -9,6 +9,7 @@ use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
 use j45l\AbstractDataStructures\Tests\Stubs\TestQueue;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
+use function j45l\functional\unindex;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertTrue;
 
@@ -166,6 +167,19 @@ final class QueueTest extends testCase
         );
 
         TestQueue::createEmpty()->queue('wrong');
+    }
+
+    public function testYieldsGetInQueueOrder(): void
+    {
+        $queue = TestQueue::createEmpty();
+
+        $queue = $queue->queue(new TestItem('A'));
+        $queue = $queue->queue(new TestItem('B'));
+        $queue = $queue->queue(new TestItem('C'));
+
+        $items = unindex(iterator_to_array($queue->yield()));
+
+        assertEquals([new TestItem('A'), new TestItem('B'), new TestItem('C')], $items);
     }
 
     #[Pure] private function anArray(): array
