@@ -7,7 +7,6 @@ use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
 use j45l\AbstractDataStructures\Tests\Stubs\UniqueIndexedTestItem;
-use j45l\Cats\Either\Failure;
 use j45l\Cats\Maybe\None;
 use j45l\Cats\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
