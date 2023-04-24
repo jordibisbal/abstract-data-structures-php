@@ -8,6 +8,7 @@ use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use Closure;
 use JetBrains\PhpStorm\Pure;
 use function Functional\each;
+use function j45l\functional\map;
 
 /** @template T */
 abstract class TypedDictionaryBasedStructure
@@ -71,7 +72,7 @@ abstract class TypedDictionaryBasedStructure
      */
     private function guardArraySet(array $items): void
     {
-        each(
+        map(
             $items,
             fn ($item) => $this->assertIsACorrectTypeOrFail()($item)
         );

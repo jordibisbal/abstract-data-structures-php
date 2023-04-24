@@ -5,24 +5,28 @@ namespace j45l\AbstractDataStructures\Tests\PersistentDataStructures;
 
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use PHPUnit\Framework\TestCase;
-use function Functional\memoize;
 
 /**
  * @phpstan-type MemoizedCallCountableBucketRouter MemoizedBucketRouter & CallCounting
  **/
 final class MemoizedBuckedRouterTest extends TestCase
 {
+    /** @noinspection PhpExpressionAlwaysNullInspection */
     public function setUp(): void
     {
         parent::setUp();
-        memoize();
+
+        (static function (): void {
+            /** @phpstan-ignore-next-line */
+            self::memoizeTraitForget();
+        })->bindTo(null, MemoizedBucketRouter::class)();
     }
 
     public function testTwoMemoizedBucketRoutersDoesNotCollisionCreatingKeys(): void
     {
         [$routerA, $routerB] = $this->getTwoBuckets();
-        self::assertEquals([1], $routerA->getBuckets('AA'));
-        self::assertEquals([1, 0], $routerB->getBuckets('AA'));
+        self::assertEquals([15], $routerA->getBuckets('AA'));
+        self::assertEquals([9, 6], $routerB->getBuckets('AA'));
     }
 
     public function testForAGivenKeyAMemoizedBucketCalculatesJustOnce(): void

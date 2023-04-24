@@ -4,8 +4,7 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures;
 
 use Countable;
-use j45l\maybe\Maybe\Maybe;
-use j45l\maybe\Optional\Optional;
+use j45l\Cats\Maybe\Maybe;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 
@@ -22,21 +21,11 @@ use JetBrains\PhpStorm\Pure;
     }
 
     /**
-     * @return Optional<T>
+     * @return Maybe<T>
      */
-    public function get(string $key): Optional
+    public function get(string $key): Maybe
     {
         return $this->itemsArray->offsetGet($key);
-    }
-
-    /**
-     * @template DT
-     * @param DT $default
-     * @return T | DT
-     */
-    public function getOrElse(string $key, mixed $default)
-    {
-        return $this->itemsArray->offsetGet($key)->getOrElse($default);
     }
 
     public function set(string $key, mixed $value): static

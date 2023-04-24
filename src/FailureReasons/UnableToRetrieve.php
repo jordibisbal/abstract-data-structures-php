@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures\FailureReasons;
 
-use j45l\maybe\Either\Reason;
+use j45l\Cats\Either\Reason\Reason;
 use JetBrains\PhpStorm\Pure;
 
 final class UnableToRetrieve implements Reason
@@ -27,5 +27,10 @@ final class UnableToRetrieve implements Reason
     #[Pure]  public function __toString(): string
     {
         return $this->reason;
+    }
+
+    public function reason(): string
+    {
+        return (string) $this;
     }
 }

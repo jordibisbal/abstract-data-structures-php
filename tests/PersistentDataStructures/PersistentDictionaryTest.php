@@ -5,6 +5,7 @@ namespace j45l\AbstractDataStructures\Tests\PersistentDataStructures;
 use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
+use j45l\Cats\Maybe\None;
 use j45l\maybe\Either\Failure;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
@@ -59,17 +60,13 @@ class PersistentDictionaryTest extends TestCase
     }
 
     /** @dataProvider bucketRouterProvider */
-    public function testRetrievingAnNonexistentElementReturnsAFailure(BucketRouter $bucketRouter): void
+    public function testRetrievingAnNonexistentElementReturnsANone(BucketRouter $bucketRouter): void
     {
         $persistentDictionary = PersistentDictionary::fromArray(['a', 'b' => 'B'], $bucketRouter);
 
         $item = $persistentDictionary['c'];
 
-        self::assertInstanceOf(Failure::class, $item);
-        assertEquals(
-            'Unable to retrieve element because the data structure has not the requested key (c).',
-            $item->reason()->toString()
-        );
+        self::assertInstanceOf(None::class, $item);
     }
 
     /** @dataProvider bucketRouterProvider */

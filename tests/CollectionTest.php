@@ -7,12 +7,13 @@ use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
 use j45l\AbstractDataStructures\Tests\Stubs\UniqueIndexedTestItem;
-use j45l\maybe\Either\Failure;
-use j45l\maybe\Maybe\Some;
-use j45l\maybe\Maybe\Maybe;
+use j45l\Cats\Either\Failure;
+use j45l\Cats\Maybe\None;
+use j45l\Cats\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
-use function Functional\map;
+
+use function j45l\functional\map;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertFalse;
@@ -56,11 +57,7 @@ final class CollectionTest extends testCase
 
         $failure = $collection->get('b');
 
-        self::assertInstanceOf(Failure::class, $failure);
-        assertEquals(
-            'Unable to retrieve element because the data structure has not the requested key (b).',
-            $failure->reason()->toString()
-        );
+        self::assertInstanceOf(None::class, $failure);
         assertEquals($originalCollection, TestCollection::createEmpty());
     }
 

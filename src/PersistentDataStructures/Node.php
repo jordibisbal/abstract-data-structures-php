@@ -27,6 +27,7 @@ class Node
         return $this->next;
     }
 
+    #[Pure]
     public function value(): mixed
     {
         return $this->value;

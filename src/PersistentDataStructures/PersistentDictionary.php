@@ -6,16 +6,16 @@ namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
 use ArrayAccess;
 use Countable;
-use j45l\AbstractDataStructures\FailureReasons\UnableToRetrieve;
-use j45l\maybe\Either\Failure;
-use j45l\maybe\Maybe\None;
-use j45l\maybe\Optional\Optional;
-use j45l\maybe\Maybe\Some;
+use j45l\Cats\Either\Either;
+use j45l\Cats\Maybe\Maybe;
 use JetBrains\PhpStorm\Pure;
+
 use function array_key_exists;
-use function Functional\each;
 use function is_int;
 use function is_null;
+use function j45l\Cats\Maybe\None;
+use function j45l\Cats\Maybe\Some;
+use function j45l\functional\map;
 
 /**
  * @template T
@@ -53,7 +53,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         $this->count = 0;
         $this->nextIntKey = 0;
 
-        each($items, fn ($value, $key) => $this->setNode($key, $value));
+        map($items, fn ($value, $key) => $this->setNode($key, $value));
     }
 
     /**
@@ -103,24 +103,28 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return $newArray;
     }
 
-    /** @phpstan-pure */
-    public function last(): mixed
+    /**
+     * @return Maybe<T>
+     */
+    #[Pure]
+    public function last(): Maybe
     {
-        if (!$this->last) {
-            return None::create();
-        }
-
-        return $this->offsetGet($this->last);
+        return match (true) {
+            !$this->last => None(),
+            default => $this->offsetGet($this->last)
+        };
     }
 
-    /** @phpstan-pure */
-    public function first(): mixed
+    /**
+     * @return Maybe<T>
+     */
+    #[Pure]
+    public function first(): Maybe
     {
-        if (!$this->first) {
-            return None::create();
-        }
-
-        return $this->offsetGet($this->first);
+        return match (true) {
+            !$this->first => None(),
+            default => $this->offsetGet($this->first)
+        };
     }
 
     #[Pure] public function hasKey(int | string $offset): bool
@@ -130,8 +134,9 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     /**
      * @return PersistentDictionary<T>
+     * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
      */
-    public function unset(int | string $key): PersistentDictionary
+    #[Pure] public function unset(int | string $key): PersistentDictionary
     {
         if (!$this->hasKey($key)) {
             return $this;
@@ -148,7 +153,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return $new;
     }
 
-    #[Pure]public function each(callable $fn): void
+    #[Pure] public function each(callable $fn): void
     {
         $key = $this->first;
         while ($key !== null) {
@@ -158,8 +163,11 @@ final class PersistentDictionary implements Countable, ArrayAccess
         }
     }
 
-    /** @return PersistentDictionary<T> */
-    public function sort(callable $sort): PersistentDictionary
+    /**
+     * @return PersistentDictionary<T>
+     * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
+     */
+    #[Pure] public function sort(callable $sort): PersistentDictionary
     {
         $newArray = $this->asArray();
         uasort($newArray, $sort);
@@ -167,8 +175,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return new self($newArray, $this->bucketRouter);
     }
 
-    /** @return array<T>
-     */
+    /** @return array<T> */
     #[Pure] public function asArray(): array
     {
         $collected = [];
@@ -246,15 +253,16 @@ final class PersistentDictionary implements Countable, ArrayAccess
 
     /**
      * @param int | string $offset
-     * @phpstan-return Optional<T>
+     * @phpstan-return Maybe<T>
      */
-    public function offsetGet($offset): mixed
+    #[Pure]
+    public function offsetGet($offset): Maybe
     {
         return match (true) {
             array_key_exists($offset, $this->getLeafBucket($offset)) =>
-                Some::from($this->getLeafBucket($offset)[$offset]->value()),
+                Some($this->getLeafBucket($offset)[$offset]->value()),
             default =>
-                Failure::because(UnableToRetrieve::becauseTheStructureHasNotTheRequestedKey((string) $offset))
+                None()
         };
     }
 
