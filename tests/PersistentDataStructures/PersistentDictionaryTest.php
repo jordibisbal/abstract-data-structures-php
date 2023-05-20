@@ -9,6 +9,8 @@ use j45l\Cats\Maybe\None;
 use j45l\maybe\Either\Failure;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
+use function iterator_to_array as iteratorToArray;
+use function j45l\functional\reduce;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
 
@@ -136,5 +138,11 @@ class PersistentDictionaryTest extends TestCase
         $failureOnString = $persistentDictionary->offsetGet('42');
 
         assertEquals($failureOnInt, $failureOnString);
+    }
+
+    public function testGettingAGeneratorForAllValue(): void
+    {
+        $array = [1 => 41, 'a' => 42, 2 => '43'];
+        assertEquals($array, iteratorToArray(PersistentDictionary::fromArray($array)->yield()));
     }
 }

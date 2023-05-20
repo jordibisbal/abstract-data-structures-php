@@ -8,6 +8,7 @@ use j45l\AbstractDataStructures\Exceptions\UnableToRetrieveValue;
 use j45l\AbstractDataStructures\Exceptions\UnableToRotateValues;
 use j45l\AbstractDataStructures\Exceptions\UnableToSwapValues;
 use JetBrains\PhpStorm\Pure;
+
 use function Functional\each;
 
 /** @template T */

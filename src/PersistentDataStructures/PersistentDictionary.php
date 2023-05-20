@@ -6,7 +6,7 @@ namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
 use ArrayAccess;
 use Countable;
-use j45l\Cats\Either\Either;
+use Generator;
 use j45l\Cats\Maybe\Maybe;
 use JetBrains\PhpStorm\Pure;
 
@@ -159,6 +159,17 @@ final class PersistentDictionary implements Countable, ArrayAccess
         while ($key !== null) {
             $node = $this->getNode($key);
             $fn($node->value(), $key);
+            $key = $node->next();
+        }
+    }
+
+    /** @return Generator<T> */
+    #[Pure] public function yield(): Generator
+    {
+        $key = $this->first;
+        while ($key !== null) {
+            $node = $this->getNode($key);
+            yield $key => $node->value();
             $key = $node->next();
         }
     }
