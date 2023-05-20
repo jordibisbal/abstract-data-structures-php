@@ -6,11 +6,12 @@ use j45l\AbstractDataStructures\PersistentDataStructures\BucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\MemoizedBucketRouter;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use j45l\Cats\Maybe\None;
-use j45l\maybe\Either\Failure;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
+
 use function iterator_to_array as iteratorToArray;
-use function j45l\functional\reduce;
+use function j45l\Cats\Maybe\None;
+use function j45l\Cats\Maybe\Some;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
 
@@ -144,5 +145,31 @@ class PersistentDictionaryTest extends TestCase
     {
         $array = [1 => 41, 'a' => 42, 2 => '43'];
         assertEquals($array, iteratorToArray(PersistentDictionary::fromArray($array)->yield()));
+    }
+
+    public function testCanReturnFirstValue(): void
+    {
+        assertEquals(Some(42), PersistentDictionary::fromArray([42, 1])->first());
+    }
+
+    public function testCanReturnFirstValueWithPredicate(): void
+    {
+        assertEquals(
+            Some(42),
+            PersistentDictionary::fromArray([1, 42, 2])->first(fn (int $value): bool => $value === 42)
+        );
+    }
+
+    public function testCanReturnFirstNoneIfNotFound(): void
+    {
+        assertEquals(None(), PersistentDictionary::fromArray([])->first());
+        assertEquals(
+            None(),
+            PersistentDictionary::fromArray([])->first(fn (int $value): bool => $value === 42)
+        );
+        assertEquals(
+            None(),
+            PersistentDictionary::fromArray([1, 2])->first(fn (int $value): bool => $value === 42)
+        );
     }
 }

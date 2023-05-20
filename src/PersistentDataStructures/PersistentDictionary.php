@@ -115,16 +115,25 @@ final class PersistentDictionary implements Countable, ArrayAccess
         };
     }
 
+
     /**
+     * @param-phpstan callable(T,int|string|null)|null $fn
      * @return Maybe<T>
      */
-    #[Pure]
-    public function first(): Maybe
+    #[Pure] public function first(callable $fn = null): Maybe
     {
-        return match (true) {
-            !$this->first => None(),
-            default => $this->offsetGet($this->first)
-        };
+        $fn ??= (static fn () => true);
+
+        $key = $this->first;
+        while ($key !== null) {
+            $node = $this->getNode($key);
+            if ($fn($node->value(), $key)) {
+                return Some($node->value());
+            };
+            $key = $node->next();
+        }
+
+        return None();
     }
 
     #[Pure] public function hasKey(int | string $offset): bool

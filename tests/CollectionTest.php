@@ -12,6 +12,8 @@ use j45l\Cats\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 
+use function j45l\Cats\Maybe\None;
+use function j45l\Cats\Maybe\Some;
 use function j45l\functional\map;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
@@ -303,5 +305,33 @@ final class CollectionTest extends testCase
         $collection = $collection->append(UniqueIndexedTestItem::create('42'));
 
         assertCount(1, $collection);
+    }
+
+    public function testGetFirst(): void
+    {
+        $collection = TestCollection::fromArray([TestItem::create('1'), TestItem::create('2')]);
+
+        assertEquals(Some(TestItem::create('1')), $collection->first());
+    }
+
+    public function testGetFirstWithPredicate(): void
+    {
+        $collection = TestCollection::fromArray([
+            TestItem::create('1'),
+            TestItem::create('42'),
+            TestItem::create('2')
+        ]);
+
+        assertEquals(
+            Some(TestItem::create('42')),
+            $collection->first(fn (TestItem $item) => $item->value === '42')
+        );
+    }
+
+    public function testGetFirstOnEmpty(): void
+    {
+        $collection = TestCollection::createEmpty();
+
+        assertEquals(None(), $collection->first());
     }
 }

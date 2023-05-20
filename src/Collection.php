@@ -108,4 +108,16 @@ use JetBrains\PhpStorm\Pure;
             default => $fn()
         };
     }
+
+
+    /**
+     * @param-phpstan callable(T,int|string|null)|null $fn
+     * @return Maybe<T>
+     */
+    public function first(callable $fn = null): Maybe
+    {
+        $fn ??= (static fn () => true);
+
+        return $this->itemsArray->first($fn);
+    }
 }
