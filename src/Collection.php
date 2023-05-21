@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace j45l\AbstractDataStructures;
 
+use Closure;
 use Countable;
+use Generator;
 use j45l\Cats\Maybe\Maybe;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
+use function j45l\functional\map;
 
 /**
  * @template T
@@ -51,10 +54,24 @@ use JetBrains\PhpStorm\Pure;
         };
     }
 
-    public function foreach(callable $callable): void
+    /**
+     * @param Closure(T,string|int=):void $fn
+     * @return void
+     */
+    public function foreach(Closure $fn): void
     {
         /** @noinspection PhpExpressionResultUnusedInspection */
-        $this->itemsArray->each($callable);
+        $this->itemsArray->each($fn);
+    }
+
+    /**
+     * @param Closure(T):T $fn
+     * @return static
+     */
+    public function map(Closure $fn): static
+    {
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        return static::fromArray(map($this->itemsArray->toArray(), $fn));
     }
 
     /**
@@ -62,7 +79,7 @@ use JetBrains\PhpStorm\Pure;
      */
     #[Pure] public function values(): array
     {
-        return array_values($this->asArray());
+        return array_values($this->toArray());
     }
 
     public function sort(callable $comparisonCallable): static
@@ -75,15 +92,23 @@ use JetBrains\PhpStorm\Pure;
      */
     #[Pure] public function keys(): array
     {
-        return array_keys($this->asArray());
+        return array_keys($this->toArray());
     }
 
     /**
      * @return array<T>
      */
-    #[Pure] public function asArray(): array
+    #[Pure] public function toArray(): array
     {
-        return $this->itemsArray->asArray();
+        return $this->itemsArray->toArray();
+    }
+
+    /**
+     * @return Generator<T>
+     */
+    #[Pure] public function yield(): Generator
+    {
+        return $this->itemsArray->yield();
     }
 
     #[Pure] public function size(): int

@@ -12,6 +12,7 @@ use j45l\Cats\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 
+use function iterator_to_array as iteratorToArray;
 use function j45l\Cats\Maybe\None;
 use function j45l\Cats\Maybe\Some;
 use function j45l\functional\map;
@@ -186,7 +187,12 @@ final class CollectionTest extends testCase
 
     public function testACollectionCanBeRetrievedAsArray(): void
     {
-        assertEquals($this->anArray(), TestCollection::fromArray($this->anArray())->asArray());
+        assertEquals($this->anArray(), TestCollection::fromArray($this->anArray())->toArray());
+    }
+
+    public function testACollectionCanBeRetrievedAsGenerator(): void
+    {
+        assertEquals($this->anArray(), iteratorToArray(TestCollection::fromArray($this->anArray())->yield()));
     }
 
     public function testAnArrayCanBeIterated(): void
@@ -232,7 +238,7 @@ final class CollectionTest extends testCase
         $memoryUsedAfterAppendingOne = $this->getMemoryUse() - $memoryWatermark;
 
         assertCount($count, $collection);
-        assertEquals($itemsArray, $collection->asArray());
+        assertEquals($itemsArray, $collection->toArray());
         assertCount($count + 1, $newCollection);
 
         $this->assertMemoryIncreaseIsBelowTenPercent($memoryUsedAfterAppendingOne, $memoryUsedByCollection);
@@ -333,5 +339,15 @@ final class CollectionTest extends testCase
         $collection = TestCollection::createEmpty();
 
         assertEquals(None(), $collection->first());
+    }
+
+    public function testCanBeMapped(): void
+    {
+        assertEquals(
+            [TestItem::create('42'), TestItem::create('2')],
+            TestCollection::fromArray([TestItem::create('41'), TestItem::create('1')])
+                ->map(fn (TestItem $item) => TestItem::create((string) (((int) $item->value) + 1)))
+                ->toArray()
+        );
     }
 }

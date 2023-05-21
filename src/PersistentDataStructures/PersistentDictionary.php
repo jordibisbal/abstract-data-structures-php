@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace j45l\AbstractDataStructures\PersistentDataStructures;
 
 use ArrayAccess;
+use Closure;
 use Countable;
 use Generator;
 use j45l\Cats\Maybe\Maybe;
@@ -71,7 +72,7 @@ final class PersistentDictionary implements Countable, ArrayAccess
      */
     public function withBucketRouter(BucketRouter $bucketRouter): PersistentDictionary
     {
-        return new self($this->asArray(), $bucketRouter);
+        return new self($this->toArray(), $bucketRouter);
     }
 
     /**
@@ -162,7 +163,11 @@ final class PersistentDictionary implements Countable, ArrayAccess
         return $new;
     }
 
-    #[Pure] public function each(callable $fn): void
+    /**
+     * @param Closure(T,string|int=):void $fn
+     * @return void
+     */
+    #[Pure] public function each(Closure $fn): void
     {
         $key = $this->first;
         while ($key !== null) {
@@ -183,28 +188,31 @@ final class PersistentDictionary implements Countable, ArrayAccess
         }
     }
 
+    /** @return array<T> */
+    #[Pure] public function toArray(): array
+    {
+        $array = [];
+
+        $key = $this->first;
+        while ($key !== null) {
+            $node = $this->getNode($key);
+            $array[$key] = $node->value();
+            $key = $node->next();
+        }
+
+        return $array;
+    }
+
     /**
      * @return PersistentDictionary<T>
      * @noinspection PhpPureFunctionMayProduceSideEffectsInspection
      */
     #[Pure] public function sort(callable $sort): PersistentDictionary
     {
-        $newArray = $this->asArray();
+        $newArray = $this->toArray();
         uasort($newArray, $sort);
 
         return new self($newArray, $this->bucketRouter);
-    }
-
-    /** @return array<T> */
-    #[Pure] public function asArray(): array
-    {
-        $collected = [];
-        /** @noinspection PhpExpressionResultUnusedInspection */
-        $this->each(function ($item, $key) use (&$collected) {
-            $collected[$key] = $item;
-        });
-
-        return $collected;
     }
 
     /**

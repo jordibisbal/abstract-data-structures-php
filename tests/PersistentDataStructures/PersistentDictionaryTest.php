@@ -20,7 +20,7 @@ class PersistentDictionaryTest extends TestCase
     public function testNewArrayIsEmpty(): void
     {
         $array = PersistentDictionary::fromArray([]);
-        assertEquals([], $array->asArray());
+        assertEquals([], $array->toArray());
     }
 
     /**
@@ -49,7 +49,7 @@ class PersistentDictionaryTest extends TestCase
     {
         $persistentDictionary = PersistentDictionary::fromArray($array);
 
-        assertEquals($array, $persistentDictionary->asArray());
+        assertEquals($array, $persistentDictionary->toArray());
         assertCount(count($array), $persistentDictionary);
     }
 
@@ -79,8 +79,8 @@ class PersistentDictionaryTest extends TestCase
 
         $newPersistentDictionary = $persistentDictionary->set(1, 4);
 
-        assertEquals([1, 2, 3], $persistentDictionary->asArray());
-        assertEquals([1, 4, 3], $newPersistentDictionary->asArray());
+        assertEquals([1, 2, 3], $persistentDictionary->toArray());
+        assertEquals([1, 4, 3], $newPersistentDictionary->toArray());
     }
 
     /**
@@ -108,7 +108,7 @@ class PersistentDictionaryTest extends TestCase
 
         $persistentDictionary = $persistentDictionary->append(4);
 
-        assertEquals([1, 2, 3, 4], $persistentDictionary->asArray());
+        assertEquals([1, 2, 3, 4], $persistentDictionary->toArray());
     }
 
     /** @dataProvider bucketRouterProvider */
@@ -119,7 +119,7 @@ class PersistentDictionaryTest extends TestCase
         $persistentDictionary = $persistentDictionary->set(5, 5);
         $persistentDictionary = $persistentDictionary->append(4);
 
-        assertEquals([1, 2, 3, 5 => 5, 6 => 4], $persistentDictionary->asArray());
+        assertEquals([1, 2, 3, 5 => 5, 6 => 4], $persistentDictionary->toArray());
     }
 
     public function testSettingAKeyAsIntegerIsTheSameAsUsingTheString(): void
