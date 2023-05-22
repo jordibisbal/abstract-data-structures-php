@@ -7,7 +7,7 @@ use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
 use j45l\AbstractDataStructures\PersistentDataStructures\PersistentDictionary;
 use Closure;
 use JetBrains\PhpStorm\Pure;
-use function Functional\each;
+
 use function j45l\functional\map;
 
 /** @template T */
@@ -49,6 +49,23 @@ abstract class TypedDictionaryBasedStructure
 
         return $dataStructure;
     }
+
+    /**
+     * @param Closure(mixed):T $mapper
+     * @param iterable<mixed> $items
+     * @throws UnableToSetValue
+     */
+    public static function fromMap(iterable $items, Closure $mapper): static
+    {
+        $dataStructure = new static(PersistentDictionary::fromArray([]));
+
+        $items = map($items, $mapper);
+        $dataStructure->guardArraySet($items);
+        $dataStructure->itemsArray = PersistentDictionary::fromArray($items);
+
+        return $dataStructure;
+    }
+
 
     #[Pure] public function count(): int
     {

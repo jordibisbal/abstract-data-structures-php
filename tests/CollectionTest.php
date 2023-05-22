@@ -350,4 +350,13 @@ final class CollectionTest extends testCase
                 ->toArray()
         );
     }
+
+    public function testCanBeCreatedFromAMapOperation(): void
+    {
+        assertEquals(
+            [TestItem::create('42'), TestItem::create('2')],
+            TestCollection::fromMap([41, 1], static fn (int $x) => TestItem::create((string) ($x + 1)))
+                ->toArray()
+        );
+    }
 }
