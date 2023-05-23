@@ -1,17 +1,16 @@
 <?php /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
 declare(strict_types=1);
 
-namespace j45l\AbstractDataStructures\Tests;
+namespace j45l\AbstractDataStructures\Tests\PersistentDataStructures;
 
 use j45l\AbstractDataStructures\Exceptions\UnableToSetValue;
-use j45l\AbstractDataStructures\Tests\Stubs\TestCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\TestItem;
+use j45l\AbstractDataStructures\Tests\Stubs\TestPersistentCollection;
 use j45l\AbstractDataStructures\Tests\Stubs\UniqueIndexedTestItem;
 use j45l\Cats\Maybe\None;
 use j45l\Cats\Maybe\Some;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
-
 use function iterator_to_array as iteratorToArray;
 use function j45l\Cats\Maybe\None;
 use function j45l\Cats\Maybe\Some;
@@ -21,27 +20,27 @@ use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertFalse;
 use function PHPUnit\Framework\assertTrue;
 
-final class CollectionTest extends testCase
+final class PersistentCollectionTest extends testCase
 {
     public function testCanBeCreatedEmpty(): void
     {
-        assertTrue(TestCollection::createEmpty()->isEmpty());
+        assertTrue(TestPersistentCollection::createEmpty()->isEmpty());
     }
 
     public function testAnItemCanBeAddedToACollection(): void
     {
-        $collection = TestCollection::createEmpty();
+        $collection = TestPersistentCollection::createEmpty();
         $originalCollection = $collection;
         $newCollection = $collection->append(new TestItem('test'));
 
         assertFalse($newCollection->isEmpty());
         assertCount(1, $newCollection);
-        assertEquals($originalCollection, TestCollection::createEmpty());
+        assertEquals($originalCollection, TestPersistentCollection::createEmpty());
     }
 
     public function testAnItemCanBeRetrievedByKey(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         $item = $collection->get('b');
@@ -49,23 +48,23 @@ final class CollectionTest extends testCase
         self::assertInstanceOf(Some::class, $item);
         self::assertInstanceOf(TestItem::class, $item->get());
         assertEquals('B', $item->get()->value);
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testWhenRetrievingANonExistingAFailureIsReturned(): void
     {
-        $collection = TestCollection::createEmpty();
+        $collection = TestPersistentCollection::createEmpty();
         $originalCollection = $collection;
 
         $failure = $collection->get('b');
 
         self::assertInstanceOf(None::class, $failure);
-        assertEquals($originalCollection, TestCollection::createEmpty());
+        assertEquals($originalCollection, TestPersistentCollection::createEmpty());
     }
 
     public function testAnItemCanBeSetByKey(): void
     {
-        $collection = TestCollection::createEmpty();
+        $collection = TestPersistentCollection::createEmpty();
         $originalCollection = $collection;
 
         $collection = $collection->set('key', new TestItem('value'));
@@ -75,30 +74,30 @@ final class CollectionTest extends testCase
         self::assertInstanceOf(Some::class, $item);
         self::assertInstanceOf(TestItem::class, $item->get());
         assertEquals('value', $item->get()->value);
-        assertEquals($originalCollection, TestCollection::createEmpty());
+        assertEquals($originalCollection, TestPersistentCollection::createEmpty());
     }
 
     public function testTheValuesCanBeRetrieved(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         assertEquals(array_values($this->anArray()), $collection->values());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testTheKeysCanBeRetrieved(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         assertEquals(['a', 'b', 'c'], $collection->keys());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testTheCollectionCanBeSortedByValue(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         $sort = fn ($a, $b) => $b <=> $a;
@@ -108,23 +107,23 @@ final class CollectionTest extends testCase
 
         assertEquals(array_values($array), $collection->values());
         assertEquals(array_keys($array), $collection->keys());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testTheCollectionIsImmutableToSorting(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         $collection->sort(fn ($a, $b) => $b <=> $a);
 
         assertEquals(array_keys($this->anArray()), $collection->keys());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testAnItemCanBeRemovedByKey(): void
     {
-        $collection = TestCollection::fromArray($this->aMixedKeysArray());
+        $collection = TestPersistentCollection::fromArray($this->aMixedKeysArray());
         $originalCollection = $collection;
 
         $collection = $collection->remove(1);
@@ -137,29 +136,29 @@ final class CollectionTest extends testCase
         assertEquals(array_values($array), $collection->values());
         assertCount(4, $collection);
 
-        assertEquals(TestCollection::fromArray($this->aMixedKeysArray()), $originalCollection);
+        assertEquals(TestPersistentCollection::fromArray($this->aMixedKeysArray()), $originalCollection);
     }
 
     public function testRemovingAnNonexistentKeyProducesNoEffect(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         $collection = $collection->remove('nonexistent');
 
         assertEquals(array_keys($this->anArray()), $collection->keys());
         assertEquals(array_values($this->anArray()), $collection->values());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testACollectionCanBeCheckForAKeyExistence(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         assertTrue($collection->hasKey('b'));
         assertFalse($collection->hasKey('d'));
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testAnExceptionIsThrownIfTheAppendedElementIsNotOfTheProperType(): void
@@ -171,7 +170,7 @@ final class CollectionTest extends testCase
         );
 
         // @phpstan-ignore-next-line
-        TestCollection::createEmpty()->append('string');
+        TestPersistentCollection::createEmpty()->append('string');
     }
 
     public function testAnExceptionIsThrownIfTheSetElementIsNotOfTheProperType(): void
@@ -182,23 +181,23 @@ final class CollectionTest extends testCase
             'j45l\AbstractDataStructures\Tests\Stubs\TestItem expected.'
         );
 
-        TestCollection::createEmpty()->set('', 'string');
+        TestPersistentCollection::createEmpty()->set('', 'string');
     }
 
     public function testACollectionCanBeRetrievedAsArray(): void
     {
-        assertEquals($this->anArray(), TestCollection::fromArray($this->anArray())->toArray());
+        assertEquals($this->anArray(), TestPersistentCollection::fromArray($this->anArray())->toArray());
     }
 
     public function testACollectionCanBeRetrievedAsGenerator(): void
     {
-        assertEquals($this->anArray(), iteratorToArray(TestCollection::fromArray($this->anArray())->yield()));
+        assertEquals($this->anArray(), iteratorToArray(TestPersistentCollection::fromArray($this->anArray())->yield()));
     }
 
     public function testAnArrayCanBeIterated(): void
     {
         $collectedItems = [];
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         $collection->foreach(
@@ -208,16 +207,16 @@ final class CollectionTest extends testCase
         );
 
         assertEquals($this->anArray(), $collectedItems);
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     public function testSizeIsCount(): void
     {
-        $collection = TestCollection::fromArray($this->anArray());
+        $collection = TestPersistentCollection::fromArray($this->anArray());
         $originalCollection = $collection;
 
         assertEquals($collection->count(), $collection->size());
-        assertEquals($originalCollection, TestCollection::fromArray($this->anArray()));
+        assertEquals($originalCollection, TestPersistentCollection::fromArray($this->anArray()));
     }
 
     /**
@@ -231,7 +230,7 @@ final class CollectionTest extends testCase
 
         $memoryWatermark = $this->getMemoryUse();
         $itemsArray = map(range(1, $count), fn ($int) => new TestItem((string)$int));
-        $collection = TestCollection::fromArray($itemsArray);
+        $collection = TestPersistentCollection::fromArray($itemsArray);
 
         $memoryUsedByCollection = $this->getMemoryUse() - $memoryWatermark;
         $newCollection = $collection->append(new TestItem('new value'));
@@ -292,12 +291,12 @@ final class CollectionTest extends testCase
         );
 
         // @phpstan-ignore-next-line
-        TestCollection::fromArray([42]);
+        TestPersistentCollection::fromArray([42]);
     }
 
     public function testAppendingAnElementTwiceAppendItTwice(): void
     {
-        $collection = TestCollection::fromArray([]);
+        $collection = TestPersistentCollection::fromArray([]);
         $collection = $collection->append(TestItem::create('42'));
         $collection = $collection->append(TestItem::create('42'));
 
@@ -306,7 +305,7 @@ final class CollectionTest extends testCase
 
     public function testAppendingAnUniqueElementTwiceAppendItJustOnce(): void
     {
-        $collection = TestCollection::fromArray([]);
+        $collection = TestPersistentCollection::fromArray([]);
         $collection = $collection->append(UniqueIndexedTestItem::create('42'));
         $collection = $collection->append(UniqueIndexedTestItem::create('42'));
 
@@ -315,14 +314,14 @@ final class CollectionTest extends testCase
 
     public function testGetFirst(): void
     {
-        $collection = TestCollection::fromArray([TestItem::create('1'), TestItem::create('2')]);
+        $collection = TestPersistentCollection::fromArray([TestItem::create('1'), TestItem::create('2')]);
 
         assertEquals(Some(TestItem::create('1')), $collection->first());
     }
 
     public function testGetFirstWithPredicate(): void
     {
-        $collection = TestCollection::fromArray([
+        $collection = TestPersistentCollection::fromArray([
             TestItem::create('1'),
             TestItem::create('42'),
             TestItem::create('2')
@@ -336,7 +335,7 @@ final class CollectionTest extends testCase
 
     public function testGetFirstOnEmpty(): void
     {
-        $collection = TestCollection::createEmpty();
+        $collection = TestPersistentCollection::createEmpty();
 
         assertEquals(None(), $collection->first());
     }
@@ -345,7 +344,7 @@ final class CollectionTest extends testCase
     {
         assertEquals(
             [TestItem::create('42'), TestItem::create('2')],
-            TestCollection::fromArray([TestItem::create('41'), TestItem::create('1')])
+            TestPersistentCollection::fromArray([TestItem::create('41'), TestItem::create('1')])
                 ->map(fn (TestItem $item) => TestItem::create((string) (((int) $item->value) + 1)))
                 ->toArray()
         );
@@ -355,7 +354,7 @@ final class CollectionTest extends testCase
     {
         assertEquals(
             [TestItem::create('42'), TestItem::create('2')],
-            TestCollection::fromMap([41, 1], static fn (int $x) => TestItem::create((string) ($x + 1)))
+            TestPersistentCollection::fromMap([41, 1], static fn (int $x) => TestItem::create((string) ($x + 1)))
                 ->toArray()
         );
     }
